@@ -7,7 +7,6 @@
 <p align="center">Benchmarks for efficient vision distillation</p>
 
 A benchmark for comparing the performance of MaskedKD and new methods.
-
 [COCO single](datasets/coco_single/README.md) evaluates classification accuracy, while [Waterbirds](datasets/waterbirds/README.md) tests robustness to spurious correlations.
 
 ## 데이터셋
