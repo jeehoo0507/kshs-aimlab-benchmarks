@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/kshs-aimlab-lockup.png" alt="강원과학고등학교 × AIM Lab" width="640">
+  <img src="assets/kshs-aimlab-lockup-balanced.png" alt="강원과학고등학교 × AIM Lab" width="640">
 </p>
 
 <h1 align="center">KSHS × AIM Lab</h1>
