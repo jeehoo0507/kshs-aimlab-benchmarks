@@ -21,13 +21,23 @@ coco_single/
   masks/{train2017,val2017}/*.png
 ```
 
-The manifest records the class order and each image's `id`, `label`, `split`, `probe` flag, relative image/mask paths, and SHA-256 hashes. Source images and the dataset-generation script are not included here.
+The manifest records the class order and each image's `id`, `label`, `split`, `probe` flag, relative image/mask paths, and SHA-256 hashes. Downloaded data is written to the Git-ignored `data/coco_single/` directory.
+
+## Preparation
+
+From the repository root:
+
+```bash
+bash datasets/coco_single/setup.sh
+```
+
+This installs the small data-preparation dependencies in `.venv-data/`, downloads the COCO 2017 annotations and eligible source images, builds foreground masks, removes duplicates, creates the documented train/validation/test split, and validates the result. It uses CPU only. Rerun the command to reuse a completed dataset or resume cached downloads. The preparation rule follows [aim-lab-test-2](https://github.com/jeehoo0507/aim-lab-test-2) (commit `0ee46e4`).
 
 ## Validation
 
 ```bash
-python3 scripts/check_assets.py coco /path/to/coco_single
-python3 scripts/check_assets.py coco /path/to/coco_single --full
+python3 scripts/check_assets.py coco data/coco_single
+python3 scripts/check_assets.py coco data/coco_single --full
 ```
 
 The first command checks the manifest and file presence; `--full` also checks file hashes.
