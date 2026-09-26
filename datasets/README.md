@@ -1,10 +1,10 @@
 # Datasets
 
-이 디렉터리는 실험에 사용할 데이터의 **선정 기준과 검증 방법**을 설명합니다. 원본 이미지와 segmentation mask는 포함하지 않습니다. 로컬 `data/` 또는 팀 공유 저장 공간에 데이터를 준비한 뒤 아래 문서와 대조하세요.
+Dataset images and masks are not stored in this repository. Prepare them locally, then use the validation commands in each guide.
 
-| Dataset | Required files | Details |
+| Dataset | Required files | Guide |
 | --- | --- | --- |
 | COCO single | `manifest.json`, images, masks | [COCO single](coco_single/README.md) |
-| Waterbirds | Images, `metadata.csv`; CUB segmentation for FG/BG analysis | [Waterbirds](waterbirds/README.md) |
+| Waterbirds | Images, `metadata.csv`; CUB masks for FG/BG analysis | [Waterbirds](waterbirds/README.md) |
 
-COCO single의 `manifest.json`은 이미지별 라벨·분할·파일 해시를 기록합니다. Waterbirds는 원본 `metadata.csv`의 분할을 따릅니다. 결과를 기록할 때는 사용한 `manifest.json` 또는 `metadata.csv`의 SHA-256을 함께 남겨 데이터 구성을 식별합니다.
+Record the SHA-256 of the COCO manifest or Waterbirds metadata with every result to identify the exact split.
