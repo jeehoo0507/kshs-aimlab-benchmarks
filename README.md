@@ -39,9 +39,16 @@ python3 scripts/check_assets.py waterbirds /path/to/waterbird_complete95_forest2
 
 These commands check existing datasets; they do not download data.
 
-## Checkpoints and Results
+## Checkpoints
 
-The author-trained MaskedKD reference weights belong in [checkpoints](checkpoints/README.md); per-seed accuracy and training cost belong in [results](results/README.md). Checkpoints and measured results have not been added yet. See the [GPU guide](GPU.md) before running experiments.
+Author-trained MaskedKD reference checkpoints will be added under [`checkpoints/coco/`](checkpoints/coco/) and [`checkpoints/waterbirds/`](checkpoints/waterbirds/).
+
+## Results
+
+- [COCO single CSV](results/coco.csv): per-seed macro accuracy and training cost.
+- [Waterbirds CSV](results/waterbirds.csv): per-seed worst-group accuracy and training cost.
+
+The CSV files contain headers only; measured results will be added later.
 
 ## References
 
