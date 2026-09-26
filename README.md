@@ -8,6 +8,8 @@
 
 A benchmark for comparing the performance of MaskedKD and new methods.
 
+[COCO single](datasets/coco_single/README.md) evaluates classification accuracy, while [Waterbirds](datasets/waterbirds/README.md) tests robustness to spurious correlations.
+
 ## 데이터셋
 
 | 데이터셋 | 평가 과제 | 주요 지표 |
