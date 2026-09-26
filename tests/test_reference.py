@@ -128,3 +128,8 @@ def test_auto_jobs_respects_measured_vram(monkeypatch):
     assert cli.choose_jobs(SimpleNamespace(device="cuda", jobs="auto"))[0] == 2
     with pytest.raises(ValueError, match="safe maximum=2"):
         cli.choose_jobs(SimpleNamespace(device="cuda", jobs="3"))
+    monkeypatch.setattr(cli, "benchmark_memory", lambda args, role="student": 5.0)
+    cli.check_teacher_memory(SimpleNamespace())
+    monkeypatch.setattr(cli, "free_gib", lambda: 8.0)
+    with pytest.raises(RuntimeError, match="Teacher needs at least"):
+        cli.check_teacher_memory(SimpleNamespace())

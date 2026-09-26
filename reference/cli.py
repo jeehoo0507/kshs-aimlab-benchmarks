@@ -100,13 +100,23 @@ def free_gib():
     return free_bytes / 1024**3
 
 
-def benchmark_memory(args):
+def benchmark_memory(args, role="student"):
     command = [sys.executable, "-m", "reference.cli", "_benchmark", "--dataset", args.dataset,
-               "--output-root", str(args.output_root), "--config", str(args.config)]
+               "--output-root", str(args.output_root), "--config", str(args.config), "--role", role]
     result = subprocess.run(command, cwd=ROOT, capture_output=True, text=True)
     if result.returncode:
         raise RuntimeError(f"VRAM benchmark failed:\n{result.stderr}\n{result.stdout}")
     return json.loads(result.stdout.strip().splitlines()[-1])["peak_reserved_gib"]
+
+
+def check_teacher_memory(args):
+    peak = benchmark_memory(args, "teacher")
+    available = free_gib()
+    required = peak * 1.25 + 3.0
+    if available < required:
+        raise RuntimeError(f"Teacher needs at least {required:.1f} GiB free by the measured "
+                           f"VRAM budget; only {available:.1f} GiB is free")
+    print(f"Teacher VRAM benchmark peak={peak:.2f} GiB; free={available:.2f} GiB", flush=True)
 
 
 def choose_jobs(args):
@@ -188,23 +198,31 @@ def benchmark(args):
         raise RuntimeError("CUDA unavailable")
     cfg = load_config(args.config)
     classes = 10 if args.dataset == "coco" else 2
-    teacher_file = run_directory(args.output_root, args.dataset, "teacher", 0) / "best.pt"
     device = torch.device("cuda")
-    teacher = build_model("teacher", classes, drop_path=cfg["drop_path"]).to(device).eval().requires_grad_(False)
-    teacher.load_state_dict(load_checkpoint(teacher_file)["model"])
-    student = build_model("student", classes, pretrained=True, drop_path=cfg["drop_path"]).to(device)
-    optimizer = torch.optim.AdamW(student.parameters(), lr=cfg["learning_rate"])
+    if args.role == "teacher":
+        model = build_model("teacher", classes, pretrained=True, drop_path=cfg["drop_path"]).to(device)
+        teacher = None
+    else:
+        teacher_file = run_directory(args.output_root, args.dataset, "teacher", 0) / "best.pt"
+        teacher = build_model("teacher", classes, drop_path=cfg["drop_path"]).to(device).eval().requires_grad_(False)
+        teacher.load_state_dict(load_checkpoint(teacher_file)["model"])
+        model = build_model("student", classes, pretrained=True, drop_path=cfg["drop_path"]).to(device)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=cfg["learning_rate"])
     scaler = torch.amp.GradScaler("cuda")
     images = torch.randn(cfg["batch_size"], 3, 224, 224, device=device)
     labels = torch.arange(cfg["batch_size"], device=device) % classes
     torch.cuda.reset_peak_memory_stats()
     for _ in range(2):
         with torch.autocast("cuda", dtype=torch.float16):
-            logits, attention = student(images, return_attention=True)
-            with torch.no_grad():
-                targets = teacher(images, attention.detach().topk(cfg["keep_patches"], 1).indices)
-            loss = 0.5 * F.cross_entropy(logits.float(), labels) + 0.5 * F.kl_div(
-                F.log_softmax(logits.float(), 1), F.softmax(targets.float(), 1), reduction="batchmean")
+            if teacher is None:
+                logits = model(images)
+                loss = F.cross_entropy(logits.float(), labels)
+            else:
+                logits, attention = model(images, return_attention=True)
+                with torch.no_grad():
+                    targets = teacher(images, attention.detach().topk(cfg["keep_patches"], 1).indices)
+                loss = 0.5 * F.cross_entropy(logits.float(), labels) + 0.5 * F.kl_div(
+                    F.log_softmax(logits.float(), 1), F.softmax(targets.float(), 1), reduction="batchmean")
         scaler.scale(loss).backward()
         scaler.step(optimizer)
         scaler.update()
@@ -230,6 +248,8 @@ def parser():
             q.add_argument("--seed", type=int, required=True)
             q.add_argument("--device", choices=("cuda", "cpu"), default="cuda")
             q.add_argument("--debug", action="store_true")
+        if name == "_benchmark":
+            q.add_argument("--role", choices=("teacher", "student"), default="student")
     return p
 
 
@@ -263,8 +283,11 @@ def main():
         if not torch.cuda.is_available():
             raise RuntimeError("CUDA unavailable; install the CUDA build of PyTorch")
         prefetch()
+        check_teacher_memory(args)
         run_teacher(args)
         jobs, reserve = choose_jobs(args)
+        if free_gib() < reserve + 2.5:
+            raise RuntimeError("Free GPU memory fell below the isolated-student reserve; retry later")
         run_seed_zero(args)
         run_students(args, jobs, reserve)
         export(args.output_root, args.dataset)
