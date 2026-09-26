@@ -1,5 +1,6 @@
 """Resumable, validation-selected MaskedKD reference runs."""
 import hashlib
+import csv
 import json
 import math
 import os
@@ -69,6 +70,26 @@ def source_commit():
 
 def metadata_hash(name, root):
     return sha256(Path(root) / ("manifest.json" if name == "coco" else "metadata.csv"))
+
+
+def foreground_hash(name, root, seg_root):
+    if name == "coco":
+        rows = json.loads((Path(root) / "manifest.json").read_text())["images"]
+        paths = [(row["mask"], Path(root) / row["mask"]) for row in rows
+                 if row["split"] in ("val", "test")]
+    else:
+        if seg_root is None:
+            raise ValueError("Waterbirds foreground diagnostics require --seg-root")
+        with (Path(root) / "metadata.csv").open(newline="", encoding="utf-8") as stream:
+            rows = list(csv.DictReader(stream))
+        paths = [(str(Path(row["img_filename"]).with_suffix(".png")),
+                  Path(seg_root) / Path(row["img_filename"]).with_suffix(".png"))
+                 for row in rows if int(row["split"]) in (1, 2)]
+    digest = hashlib.sha256()
+    for relative, path in paths:
+        digest.update(relative.encode())
+        digest.update(bytes.fromhex(sha256(path)))
+    return digest.hexdigest()
 
 
 def pretrain_hash(role, debug=False):
@@ -169,7 +190,8 @@ def run_directory(output_root, dataset, role, seed):
     return base / "teacher" if role == "teacher" else base / "maskedkd" / f"seed_{seed}"
 
 
-def train_run(dataset, data_root, output_root, cfg, role, seed, device_name="cuda", debug=False):
+def train_run(dataset, data_root, output_root, cfg, role, seed, device_name="cuda", debug=False,
+              seg_root=None):
     if role not in ("teacher", "student"):
         raise ValueError(role)
     if device_name == "cuda" and not torch.cuda.is_available():
@@ -179,13 +201,15 @@ def train_run(dataset, data_root, output_root, cfg, role, seed, device_name="cud
     directory = run_directory(output_root, dataset, role, seed)
     directory.mkdir(parents=True, exist_ok=True)
     data_sha = metadata_hash(dataset, data_root)
+    foreground_sha = foreground_hash(dataset, data_root, seg_root) if role == "student" else ""
     teacher_file = run_directory(output_root, dataset, "teacher", 0) / "best.pt"
     if role == "student" and not teacher_file.is_file():
         raise FileNotFoundError(f"Frozen teacher missing: {teacher_file}")
     teacher_sha = sha256(teacher_file) if role == "student" else ""
     role_cfg = {**cfg, "seed": seed, "dataset": dataset, "role": role, "debug": debug}
     fingerprint = hashlib.sha256(json.dumps({"config": role_cfg, "data": data_sha,
-                                             "teacher": teacher_sha, "code": code_hash()},
+                                             "teacher": teacher_sha, "foreground": foreground_sha,
+                                             "code": code_hash()},
                                             sort_keys=True).encode()).hexdigest()
     result_path = directory / "result.json"
     if result_path.is_file():
@@ -231,7 +255,13 @@ def train_run(dataset, data_root, output_root, cfg, role, seed, device_name="cud
     train_data = BenchmarkDataset(dataset, data_root, "train", training=True)
     val_data = BenchmarkDataset(dataset, data_root, "val")
     test_data = BenchmarkDataset(dataset, data_root, "test")
-    probe_data = BenchmarkDataset(dataset, data_root, "probe") if role == "student" else None
+    # Keep validation membership and ordering fixed across all seeds and epochs.
+    probe_data = (BenchmarkDataset(dataset, data_root, "val", with_foreground=True,
+                                   seg_root=seg_root) if role == "student" else None)
+    if probe_data is not None:
+        write_json(directory / "validation_sample_ids.json",
+                   [row["image"] if dataset == "coco" else row["img_filename"]
+                    for row in probe_data.records])
     total_epochs = cfg["teacher_epochs"] if role == "teacher" else cfg["student_epochs"]
     scheduled_probes = {epoch for epoch in cfg["probe_epochs"] if epoch <= total_epochs}
     if role == "student" and start_epoch == 0 and 0 in scheduled_probes and not probes:
@@ -284,6 +314,15 @@ def train_run(dataset, data_root, output_root, cfg, role, seed, device_name="cud
     best_checkpoint = directory / "best.pt"
     model.load_state_dict(load_checkpoint(best_checkpoint)["model"])
     best_test = evaluate(model, test_data, device, cfg["eval_batch_size"])
+    test_mask = None
+    if role == "student":
+        diagnostic_test = BenchmarkDataset(dataset, data_root, "test", with_foreground=True,
+                                           seg_root=seg_root)
+        test_mask = mask_probe(model, teacher, diagnostic_test, device,
+                               cfg["eval_batch_size"], cfg["keep_patches"], record_predictions=True)
+        test_mask["sample_ids"] = [row["image"] if dataset == "coco" else row["img_filename"]
+                                   for row in diagnostic_test.records]
+        write_json(directory / "test_mask.json", test_mask)
     model.load_state_dict(last_state)
     last_test = evaluate(model, test_data, device, cfg["eval_batch_size"])
     peak = torch.cuda.max_memory_reserved(device) / 1024**3 if device.type == "cuda" else 0.0
@@ -292,12 +331,16 @@ def train_run(dataset, data_root, output_root, cfg, role, seed, device_name="cud
               "method": "teacher" if role == "teacher" else "maskedkd", "seed": seed,
               "student_arch": "deit_tiny_patch16_224" if role == "student" else "",
               "teacher_arch": "deit_small_patch16_224", "student_init": "imagenet" if role == "student" else "",
-              "dataset_sha256": data_sha, "teacher_sha256": teacher_sha,
+              "dataset_sha256": data_sha, "foreground_sha256": foreground_sha,
+              "teacher_sha256": teacher_sha,
               "pretrained_sha256": initial_sha, "code_sha256": code_hash(), "code_commit": source_commit(),
               "config": role_cfg, "epochs": total_epochs, "best_epoch": best_epoch,
               "train_samples": len(train_data), "class_names": train_data.classes,
               "selection_metric": selection_metric(dataset), "best_validation": best_score,
               "best_test": best_test, "last_test": last_test,
+              "test_mask": {key: value for key, value in test_mask.items()
+                            if key not in ("selection_hex", "predictions", "sample_ids")}
+              if test_mask is not None else None,
               "train_seconds": train_seconds, "wall_seconds": sum(row["epoch_seconds"] for row in history),
               "peak_vram_gib": peak, "checkpoint_sha256": sha256(best_checkpoint),
               "parallel_jobs": int(os.environ.get("REFERENCE_PARALLEL_JOBS", "1")),

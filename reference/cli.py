@@ -40,6 +40,18 @@ def prepare_data(dataset, data_root, supplied):
                    cwd=ROOT, check=True)
 
 
+def prepare_segmentation(dataset, data_root, seg_root, supplied):
+    if dataset != "waterbirds":
+        return
+    if not seg_root.is_dir():
+        if supplied:
+            raise FileNotFoundError(f"CUB segmentation masks missing at --seg-root {seg_root}")
+        subprocess.run([sys.executable, str(ROOT / "datasets/waterbirds/download_masks.py"),
+                        "--dataset", str(data_root), "--output", str(seg_root)], cwd=ROOT, check=True)
+    subprocess.run([sys.executable, str(ROOT / "scripts/check_assets.py"), "waterbirds",
+                    str(data_root), "--seg-root", str(seg_root)], cwd=ROOT, check=True)
+
+
 def prefetch():
     for role in ("teacher", "student"):
         print(f"Caching official DeiT {role} ImageNet weights", flush=True)
@@ -50,7 +62,8 @@ def worker_command(args, role, seed, debug=False):
     return [sys.executable, "-m", "reference.cli", "_worker", "--dataset", args.dataset,
             "--data-root", str(args.data_root), "--output-root", str(args.output_root),
             "--config", str(args.config), "--device", args.device,
-            "--role", role, "--seed", str(seed)] + (["--debug"] if debug else [])
+            "--role", role, "--seed", str(seed), "--seg-root", str(args.seg_root)] + (
+                ["--debug"] if debug else [])
 
 
 def failed_log(path):
@@ -240,6 +253,8 @@ def parser():
         q.add_argument("--data-root")
         q.add_argument("--output-root", default="outputs/reference")
         q.add_argument("--config", default="configs/reference.json")
+        if name in ("run", "_worker"):
+            q.add_argument("--seg-root", help="CUB segmentation directory for Waterbirds diagnostics")
         if name == "run":
             q.add_argument("--jobs", default="auto")
             q.add_argument("--device", choices=("cuda",), default="cuda")
@@ -259,11 +274,15 @@ def main():
     args.config = Path(args.config).expanduser().resolve()
     supplied_data_root = args.data_root is not None
     args.data_root = data_root_for(args.dataset, args.data_root)
+    if args.command in ("run", "_worker"):
+        supplied_seg_root = args.seg_root is not None
+        args.seg_root = (Path(args.seg_root).expanduser().resolve() if supplied_seg_root else
+                         ROOT / "data/CUB_200_2011/segmentations")
     os.environ.setdefault("TORCH_HOME", str(ROOT / ".cache" / "torch"))
     cfg = load_config(args.config)
     if args.command == "_worker":
         result = train_run(args.dataset, args.data_root, args.output_root, cfg,
-                           args.role, args.seed, args.device, args.debug)
+                           args.role, args.seed, args.device, args.debug, args.seg_root)
         print(json.dumps({"role": args.role, "seed": args.seed,
                           "best_epoch": result["best_epoch"], "best_validation": result["best_validation"]}))
     elif args.command == "_benchmark":
@@ -280,6 +299,7 @@ def main():
             print(f"{role:7} seed={seed}: {epoch}/{total} {'complete' if completed else 'pending/running'}")
     elif args.command == "run":
         prepare_data(args.dataset, args.data_root, supplied_data_root)
+        prepare_segmentation(args.dataset, args.data_root, args.seg_root, supplied_seg_root)
         if not torch.cuda.is_available():
             raise RuntimeError("CUDA unavailable; install the CUDA build of PyTorch")
         prefetch()

@@ -9,7 +9,7 @@ from pathlib import Path
 from .engine import ROOT, run_directory, sha256
 
 
-MAIN_FIELDS = ("dataset", "data_sha256", "method", "teacher_sha256", "pretrained_sha256",
+MAIN_FIELDS = ("dataset", "data_sha256", "foreground_sha256", "method", "teacher_sha256", "pretrained_sha256",
                "student_arch", "student_init",
                "keep_patches", "seed", "epochs", "selection_metric", "best_epoch", "val_score",
                "test_primary", "test_overall", "last_test_primary", "last_test_overall",
@@ -20,10 +20,14 @@ EPOCH_FIELDS = ("dataset", "method", "seed", "epoch", "lr", "train_loss", "train
                 "train_accuracy", "val_primary", "val_overall", "train_seconds", "epoch_seconds")
 CLASS_FIELDS = ("dataset", "method", "seed", "class_index", "class_name", "correct", "n", "accuracy")
 GROUP_FIELDS = ("dataset", "method", "seed", "group", "label", "background", "correct", "n", "accuracy")
-PROBE_FIELDS = ("dataset", "method", "seed", "epoch", "n", "teacher_full_accuracy",
-                "teacher_masked_accuracy", "full_correct_masked_wrong", "kl_full_to_masked",
+PROBE_FIELDS = ("dataset", "method", "seed", "epoch", "n", "student_accuracy",
+                "teacher_full_accuracy", "teacher_masked_accuracy", "full_correct_masked_wrong",
+                "full_wrong_masked_correct",
+                "full_masked_disagreement", "full_student_disagreement",
+                "masked_student_disagreement", "kl_full_to_masked",
                 "foreground_recall", "foreground_precision", "foreground_images",
                 "selection_overlap_initial", "selection_overlap_previous")
+TEST_MASK_FIELDS = ("dataset", "method", "seed", "checkpoint", *PROBE_FIELDS[4:-2])
 SUMMARY_FIELDS = ("dataset", "method", "data_sha256", "teacher_sha256", "seeds",
                   "test_primary_mean", "test_primary_sd", "test_overall_mean", "test_overall_sd",
                   "isolated_seed0_train_hours", "isolated_seed0_peak_vram_gib",
@@ -43,7 +47,7 @@ def write_csv(path, fields, rows):
         rows = [row for row in old if row.get("method") not in ("teacher", "maskedkd")] + rows
     temporary = path.with_name(path.name + ".tmp")
     with temporary.open("w", newline="") as stream:
-        writer = csv.DictWriter(stream, fieldnames=fields)
+        writer = csv.DictWriter(stream, fieldnames=fields, lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
     os.replace(temporary, path)
@@ -59,13 +63,14 @@ def completed_runs(output_root, dataset, seeds):
 
 def export(output_root, dataset, seeds=(0, 1, 2), publish_checkpoint=True):
     output_root = Path(output_root)
-    main, epochs, classes, groups, probes = [], [], [], [], []
+    main, epochs, classes, groups, probes, test_masks = [], [], [], [], [], []
     for directory, result in completed_runs(output_root, dataset, seeds):
         method, seed = result["method"], result["seed"]
         test = result["best_test"]
         metric = result["selection_metric"]
         count = result["epochs"] * result["train_samples"]
-        main.append({"dataset": dataset, "data_sha256": result["dataset_sha256"], "method": method,
+        main.append({"dataset": dataset, "data_sha256": result["dataset_sha256"],
+                     "foreground_sha256": result.get("foreground_sha256", ""), "method": method,
                      "teacher_sha256": result["teacher_sha256"],
                      "pretrained_sha256": result["pretrained_sha256"], "student_arch": result["student_arch"],
                      "student_init": result["student_init"],
@@ -110,17 +115,24 @@ def export(output_root, dataset, seeds=(0, 1, 2), publish_checkpoint=True):
             for row in json.loads((directory / "probes.json").read_text()):
                 full = {"dataset": dataset, "method": method, "seed": seed, **row}
                 probes.append({field: full.get(field) for field in PROBE_FIELDS})
+            if result.get("test_mask") is not None:
+                test_mask = {"dataset": dataset, "method": method, "seed": seed,
+                             "checkpoint": "best", **result["test_mask"]}
+                test_masks.append({field: test_mask.get(field) for field in TEST_MASK_FIELDS})
     destination = ROOT / "results"
     write_csv(destination / f"{dataset}.csv", MAIN_FIELDS, main)
     write_csv(destination / f"{dataset}_epochs.csv", EPOCH_FIELDS, epochs)
     write_csv(destination / ("coco_per_class.csv" if dataset == "coco" else "waterbirds_per_group.csv"),
               CLASS_FIELDS if dataset == "coco" else GROUP_FIELDS, classes if dataset == "coco" else groups)
     write_csv(destination / f"{dataset}_mask_probe.csv", PROBE_FIELDS, probes)
+    write_csv(destination / f"{dataset}_mask_test.csv", TEST_MASK_FIELDS, test_masks)
     students = sorted((row for row in main if row["method"] == "maskedkd"), key=lambda row: row["seed"])
     summary = []
     if len(students) == 3 and [row["seed"] for row in students] == list(seeds):
-        if len({row["data_sha256"] for row in students}) != 1 or len({row["teacher_sha256"] for row in students}) != 1:
-            raise ValueError("Cannot summarize students with different data or teacher hashes")
+        if (len({row["data_sha256"] for row in students}) != 1 or
+                len({row["foreground_sha256"] for row in students}) != 1 or
+                len({row["teacher_sha256"] for row in students}) != 1):
+            raise ValueError("Cannot summarize students with different data, foreground, or teacher hashes")
         isolated = students[0]
         if isolated["parallel_jobs"] != 1:
             raise ValueError("Seed 0 must run alone for the cost reference")

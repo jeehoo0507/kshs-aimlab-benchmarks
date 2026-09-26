@@ -27,6 +27,13 @@ def make_coco(root):
             rows.append({"id": len(rows), "split": split, "label": label,
                          "probe": split == "val", "image": str(image.relative_to(root)),
                          "mask": str(mask.relative_to(root))})
+        extra_image = root / "images" / f"val_extra_{label}.png"
+        extra_mask = root / "masks" / f"val_extra_{label}.png"
+        Image.new("RGB", (32, 32), (label * 15, 60, 90)).save(extra_image)
+        Image.new("L", (32, 32), 255).save(extra_mask)
+        rows.append({"id": len(rows), "split": "val", "label": label, "probe": False,
+                     "image": str(extra_image.relative_to(root)),
+                     "mask": str(extra_mask.relative_to(root))})
     (root / "manifest.json").write_text(json.dumps({"selection": "one_annotated_instance_per_image",
                                                     "classes": classes, "images": rows}))
 
@@ -43,6 +50,12 @@ def test_cpu_reference_train_resume_and_csv(tmp_path, monkeypatch):
     student = train_run("coco", data, output, cfg, "student", 0, "cpu", debug=True)
     assert teacher["best_epoch"] == student["best_epoch"] == 1
     assert len(student["best_test"]["class_counts"]) == 10
+    assert student["test_mask"]["n"] == 10
+    assert student["test_mask"]["foreground_recall"] == 0.5
+    test_mask = json.loads((output / "coco/maskedkd/seed_0/test_mask.json").read_text())
+    assert len(test_mask["sample_ids"]) == len(test_mask["selection_hex"]) == 10
+    assert all(len(values) == 10 for values in test_mask["predictions"].values())
+    assert len(json.loads((output / "coco/maskedkd/seed_0/probes.json").read_text())[0]["selection_hex"]) == 20
     assert train_run("coco", data, output, cfg, "student", 0, "cpu", debug=True) == student
     for seed in (1, 2):
         train_run("coco", data, output, cfg, "student", seed, "cpu", debug=True)
@@ -59,35 +72,45 @@ def test_cpu_reference_train_resume_and_csv(tmp_path, monkeypatch):
     assert (tmp_path / "checkpoints/coco/maskedkd_seed0.pt").is_file()
     with (tmp_path / "results/coco_mask_probe.csv").open() as stream:
         assert {int(row["epoch"]) for row in csv.DictReader(stream)} == {0, 1}
+    with (tmp_path / "results/coco_mask_test.csv").open() as stream:
+        assert len(list(csv.DictReader(stream))) == 3
 
 
-def test_waterbirds_group_probe_without_masks(tmp_path):
+def test_waterbirds_full_validation_and_test_with_masks(tmp_path):
     rows = []
+    masks = tmp_path / "segmentations"
+    masks.mkdir()
     for group in range(4):
         for split in (0, 1, 2):
             count = 20 if split == 1 else 1
             for index in range(count):
                 name = f"g{group}_s{split}_{index}.png"
                 Image.new("RGB", (32, 32), (group * 40, 50, 90)).save(tmp_path / name)
+                Image.new("L", (32, 32), 255).save(masks / name)
                 rows.append({"img_filename": name, "split": split,
                              "y": group // 2, "place": group % 2})
     with (tmp_path / "metadata.csv").open("w", newline="") as stream:
         writer = csv.DictWriter(stream, fieldnames=("img_filename", "split", "y", "place"))
         writer.writeheader()
         writer.writerows(rows)
-    probe = BenchmarkDataset("waterbirds", tmp_path, "probe")
-    assert len(probe) == 80
-    item = probe[0]
+    validation = BenchmarkDataset("waterbirds", tmp_path, "val", with_foreground=True, seg_root=masks)
+    assert len(validation) == 80
+    item = validation[0]
     assert item["image"].shape == (3, 224, 224)
-    assert "foreground" not in item
+    assert item["foreground"].shape == (196,)
+    assert item["foreground"].all()
     cfg = json.loads((Path(__file__).resolve().parents[1] / "configs/reference.json").read_text())
     cfg.update(teacher_epochs=1, student_epochs=1, batch_size=2, eval_batch_size=16,
                accumulation_steps=2, warmup_epochs=0, probe_epochs=[0, 1])
     output = tmp_path / "outputs"
     train_run("waterbirds", tmp_path, output, cfg, "teacher", 0, "cpu", debug=True)
-    result = train_run("waterbirds", tmp_path, output, cfg, "student", 0, "cpu", debug=True)
+    result = train_run("waterbirds", tmp_path, output, cfg, "student", 0, "cpu", debug=True,
+                       seg_root=masks)
     assert len(result["best_test"]["group_accuracy"]) == 4
     assert result["best_test"]["worst_group_accuracy"] == min(result["best_test"]["group_accuracy"])
+    assert result["test_mask"]["n"] == 4
+    assert result["test_mask"]["foreground_recall"] == 0.5
+    assert len(json.loads((output / "waterbirds/maskedkd/seed_0/probes.json").read_text())[0]["selection_hex"]) == 80
 
 
 def test_interrupted_epoch_restores_selected_checkpoint(tmp_path, monkeypatch):

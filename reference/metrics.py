@@ -1,4 +1,4 @@
-"""Accuracy and frozen-validation-probe diagnostics (values are fractions)."""
+"""Accuracy and mask diagnostics (values are fractions)."""
 import numpy as np
 import torch
 from torch.nn import functional as F
@@ -41,26 +41,38 @@ def evaluate(model, data, device, batch_size):
 
 
 @torch.inference_mode()
-def mask_probe(student, teacher, data, device, batch_size, keep=98):
+def mask_probe(student, teacher, data, device, batch_size, keep=98, record_predictions=False):
     student.eval()
     teacher.eval()
-    n = full_correct = masked_correct = full_to_wrong = 0
+    n = full_correct = masked_correct = full_to_wrong = wrong_to_masked_correct = 0
+    student_correct = full_masked_disagree = full_student_disagree = masked_student_disagree = 0
     kl_sum = fg_recall_sum = fg_precision_sum = 0.0
     fg_images = 0
     selection_hex = []
+    predictions = {"label": [], "student": [], "teacher_full": [], "teacher_masked": []}
     for batch in loader(data, batch_size):
         images = batch["image"].to(device)
         labels = batch["label"].to(device)
         with autocast(device):
-            _, attention = student(images, return_attention=True)
+            student_logits, attention = student(images, return_attention=True)
             indices = attention.topk(keep, dim=1).indices
             full_logits = teacher(images).float()
             masked_logits = teacher(images, indices).float()
         full_prediction, masked_prediction = full_logits.argmax(1), masked_logits.argmax(1)
+        student_prediction = student_logits.argmax(1)
+        if record_predictions:
+            for key, values in (("label", labels), ("student", student_prediction),
+                                ("teacher_full", full_prediction), ("teacher_masked", masked_prediction)):
+                predictions[key].extend(values.cpu().tolist())
         is_full_correct = full_prediction.eq(labels)
         full_correct += is_full_correct.sum().item()
         masked_correct += masked_prediction.eq(labels).sum().item()
+        student_correct += student_prediction.eq(labels).sum().item()
+        full_masked_disagree += full_prediction.ne(masked_prediction).sum().item()
+        full_student_disagree += full_prediction.ne(student_prediction).sum().item()
+        masked_student_disagree += masked_prediction.ne(student_prediction).sum().item()
         full_to_wrong += (is_full_correct & masked_prediction.ne(labels)).sum().item()
+        wrong_to_masked_correct += (full_prediction.ne(labels) & masked_prediction.eq(labels)).sum().item()
         kl = F.kl_div(F.log_softmax(masked_logits, dim=1), F.softmax(full_logits, dim=1),
                       reduction="none").sum(dim=1)
         kl_sum += kl.sum().item()
@@ -77,13 +89,21 @@ def mask_probe(student, teacher, data, device, batch_size, keep=98):
             fg_precision_sum += (selected_fg[valid] / keep).sum().item()
             fg_images += valid.sum().item()
         n += len(images)
-    return {"n": n, "teacher_full_accuracy": full_correct / n,
+    result = {"n": n, "student_accuracy": student_correct / n,
+            "teacher_full_accuracy": full_correct / n,
             "teacher_masked_accuracy": masked_correct / n,
+            "full_masked_disagreement": full_masked_disagree / n,
+            "full_student_disagreement": full_student_disagree / n,
+            "masked_student_disagreement": masked_student_disagree / n,
             "full_correct_masked_wrong": full_to_wrong / n,
+            "full_wrong_masked_correct": wrong_to_masked_correct / n,
             "kl_full_to_masked": kl_sum / n,
             "foreground_recall": fg_recall_sum / fg_images if fg_images else None,
             "foreground_precision": fg_precision_sum / fg_images if fg_images else None,
             "foreground_images": fg_images, "selection_hex": selection_hex}
+    if record_predictions:
+        result["predictions"] = predictions
+    return result
 
 
 def selection_overlap(current, previous, keep=98):

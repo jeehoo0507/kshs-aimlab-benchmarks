@@ -1,4 +1,4 @@
-"""The published COCO-single and Waterbirds splits, with no Waterbirds masks."""
+"""Published splits and aligned foreground masks for diagnostic evaluation."""
 import csv
 import json
 from pathlib import Path
@@ -22,8 +22,12 @@ def safe_path(root, relative):
 
 
 class BenchmarkDataset(Dataset):
-    def __init__(self, name, root, split, training=False):
+    def __init__(self, name, root, split, training=False, with_foreground=False, seg_root=None):
         self.name, self.root, self.split, self.training = name, Path(root), split, training
+        self.with_foreground = with_foreground
+        self.seg_root = Path(seg_root) if seg_root is not None else None
+        if with_foreground and name == "waterbirds" and self.seg_root is None:
+            raise ValueError("Waterbirds foreground diagnostics require --seg-root")
         if name == "coco":
             manifest = json.loads((self.root / "manifest.json").read_text())
             if manifest.get("selection") != "one_annotated_instance_per_image":
@@ -77,10 +81,15 @@ class BenchmarkDataset(Dataset):
             label, group = int(row["y"]), 2 * int(row["y"]) + int(row["place"])
         item = {"image": TF.normalize(TF.to_tensor(image), MEAN, STD),
                 "label": label, "group": group}
-        if self.name == "coco" and self.split == "probe":
-            with Image.open(safe_path(self.root, row["mask"])) as source:
+        if self.with_foreground:
+            mask_path = (safe_path(self.root, row["mask"]) if self.name == "coco" else
+                         safe_path(self.seg_root, str(Path(relative).with_suffix(".png"))))
+            with Image.open(mask_path) as source:
                 mask = source.convert("L")
-            mask = TF.resize(mask, [224, 224], InterpolationMode.NEAREST)
+            if self.name == "coco":
+                mask = TF.resize(mask, [224, 224], InterpolationMode.NEAREST)
+            else:
+                mask = TF.center_crop(TF.resize(mask, 256, InterpolationMode.NEAREST), [224, 224])
             item["foreground"] = torch.nn.functional.avg_pool2d(TF.to_tensor(mask), 16, 16).flatten() >= 0.5
         return item
 

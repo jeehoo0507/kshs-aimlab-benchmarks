@@ -33,6 +33,14 @@ bash datasets/waterbirds/setup.sh
 
 This downloads the [original group_DRO Waterbirds release](https://github.com/kohpangwei/group_DRO#waterbirds) to the Git-ignored `data/waterbird_complete95_forest2water2/` directory and validates the images and metadata. It preserves the published train/validation/test split. CUB segmentation masks are separate and are not included in this download.
 
+For foreground patch coverage in reference runs, download the [official CUB segmentations](https://data.caltech.edu/records/w9d68-gec53):
+
+```bash
+python3 datasets/waterbirds/download_masks.py
+```
+
+The reference runner executes this automatically when the masks are absent. It verifies the archive checksum and matches every Waterbirds image to its CUB mask.
+
 ## Validation
 
 ```bash
