@@ -1,6 +1,6 @@
 # COCO single
 
-![COCO 이미지와 객체 segmentation 예시](representative.png)
+![COCO 이미지와 객체 segmentation 예시](../../assets/coco-single.png)
 
 COCO의 이미지와 객체 segmentation 예시입니다. 실제 실험용 이미지와 mask는 아래 기준에 따라 별도로 준비합니다.
 

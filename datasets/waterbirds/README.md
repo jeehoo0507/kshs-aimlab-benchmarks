@@ -1,6 +1,8 @@
 # Waterbirds
 
-![새 종류와 배경 조합으로 나뉜 Waterbirds의 네 그룹 예시](representative.png)
+<p align="center">
+  <img src="../../assets/waterbirds.png" alt="새 종류와 배경 조합으로 나뉜 Waterbirds의 네 그룹 예시" width="595">
+</p>
 
 Waterbirds의 새 종류 × 배경 조합을 보여 주는 예시입니다. 그림에 적힌 샘플 수는 실제 준비한 데이터의 수를 대신하지 않으므로 `metadata.csv`에서 확인합니다.
 
