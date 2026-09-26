@@ -128,14 +128,11 @@ def check_checkpoints(index, root, full):
         require(row["dataset"] and row["architecture"] and row["source"], f"Incomplete checkpoint row: {row['id']}")
         require(row["seed"].isdigit(), f"Invalid checkpoint seed: {row['id']}")
         require(SHA256.fullmatch(row["sha256"] or ""), f"Invalid checkpoint SHA-256: {row['id']}")
-        if root is not None:
-            path = inside(root, row["relative_path"])
-            if full:
-                require(digest(path) == row["sha256"], f"Changed checkpoint: {row['id']}")
-    print(f"Checkpoint index verified: {len(rows)} registered" +
-          (" (SHA-256 checked)" if full and root else ""))
-    if rows and root is None:
-        print("  Pass --root to verify that checkpoint files are present.")
+        path = inside(root, row["relative_path"])
+        if full:
+            require(digest(path) == row["sha256"], f"Changed checkpoint: {row['id']}")
+    detail = (" (SHA-256 checked)" if full else " (file presence)") if rows else ""
+    print(f"Checkpoint index verified: {len(rows)} registered" + detail)
 
 
 def main():
@@ -149,7 +146,8 @@ def main():
     waterbirds.add_argument("--seg-root", type=Path, help="also require CUB segmentation masks")
     checkpoints = sub.add_parser("checkpoints", help="check checkpoint index")
     checkpoints.add_argument("--index", type=Path, default=REPO / "checkpoints/index.csv")
-    checkpoints.add_argument("--root", type=Path, help="base directory for registered weight files")
+    checkpoints.add_argument("--root", type=Path, default=REPO / "checkpoints",
+                             help="base directory for registered weight files (default: repository checkpoints/)")
     checkpoints.add_argument("--full", action="store_true", help="hash every registered weight")
     args = parser.parse_args()
     try:
@@ -158,7 +156,6 @@ def main():
         elif args.command == "waterbirds":
             check_waterbirds(args.root, args.seg_root)
         else:
-            require(not args.full or args.root is not None, "--full requires --root")
             check_checkpoints(args.index, args.root, args.full)
     except (OSError, ValueError, KeyError, TypeError, json.JSONDecodeError) as exc:
         parser.exit(1, f"Asset check failed: {exc}\n")

@@ -1,13 +1,9 @@
-# Local datasets, weights, downloaded reference code and experiment outputs
+# Local datasets, downloaded reference code and experiment outputs
 /data/
 /external/
 /outputs/
 /reports/
-/checkpoints/*.pt
-/checkpoints/*.pth
-/checkpoints/*.ckpt
-/checkpoints/*.safetensors
+/checkpoints/_local/
 /.venv/
 __pycache__/
 *.pyc
-

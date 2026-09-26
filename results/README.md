@@ -1,4 +1,4 @@
-# 비교 결과
+# Results
 
 `coco.csv`와 `waterbirds.csv`는 같은 열을 사용합니다. 한 행은 **하나의 seed·평가 checkpoint·지표**입니다. 여러 seed의 평균을 개별 실행 결과처럼 적지 않습니다.
 

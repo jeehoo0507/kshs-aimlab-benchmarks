@@ -1,4 +1,4 @@
-# GPU 사용 가이드
+# GPU guide
 
 실험 전 `nvidia-smi`로 GPU 모델, 남은 VRAM, 다른 프로세스를 확인합니다. RTX A5000은 총 24 GiB지만 현재 사용 가능한 양은 다를 수 있습니다.
 
@@ -12,4 +12,3 @@ watch -n 2 nvidia-smi
 학습을 중단할 때는 사용 중인 실험 코드의 정상 종료 명령을 쓰고, 마지막으로 저장된 epoch에서 같은 설정으로 재개합니다. 재개 전에는 데이터, teacher checkpoint, 설정 파일이 이전 실행과 같은지 확인합니다. 정확도와 함께 실제 소요 시간 및 peak VRAM도 기록합니다.
 
 GPU 작업 명령은 실험마다 다릅니다. 이 저장소의 `scripts/check_assets.py`는 데이터와 체크포인트 확인용이며 GPU를 사용하지 않습니다.
-
