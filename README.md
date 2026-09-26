@@ -2,6 +2,8 @@
   <img src="assets/kshs-aimlab-lockup-balanced.png" alt="강원과학고등학교 × AIM Lab" width="640">
 </p>
 
+<p align="center"><a href="README.md">English</a> · <a href="README.ko.md">한국어</a></p>
+
 <h1 align="center">KSHS × AIM Lab Benchmarks</h1>
 
 <p align="center">Benchmarks for efficient vision distillation</p>
@@ -37,9 +39,9 @@ python3 scripts/check_assets.py waterbirds /path/to/waterbird_complete95_forest2
 
 These commands check existing datasets; they do not download data.
 
-## 체크포인트와 결과
+## Checkpoints and Results
 
-비교용 MaskedKD 가중치는 [체크포인트](checkpoints/README.md)에, 무작위 시드별 정확도와 학습 비용은 [결과](results/README.md)에 기록합니다. 실제 체크포인트와 결과는 아직 등록되지 않았습니다. 실험 전에는 [GPU 가이드](GPU.md)를 확인하세요.
+The author-trained MaskedKD reference weights belong in [checkpoints](checkpoints/README.md); per-seed accuracy and training cost belong in [results](results/README.md). Checkpoints and measured results have not been added yet. See the [GPU guide](GPU.md) before running experiments.
 
 ## References
 
