@@ -6,7 +6,7 @@
 
 <p align="center">Benchmarks for efficient vision distillation</p>
 
-COCO single과 Waterbirds에서 MaskedKD의 패치 선택 방식을 비교하기 위한 저장소입니다. 데이터 구성 기준과 검증 도구를 제공하며, 직접 학습한 비교용 MaskedKD 체크포인트와 평가 결과를 추가할 예정입니다.
+A benchmark for comparing the performance of MaskedKD and new methods.
 
 ## 데이터셋
 
