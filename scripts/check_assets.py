@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check the shared datasets and checkpoint registry without GPU dependencies."""
+"""Validate COCO single and Waterbirds datasets without GPU dependencies."""
 
 import argparse
 import csv
@@ -14,7 +14,6 @@ CLASSES = ("giraffe", "airplane", "clock", "zebra", "train", "bird",
            "elephant", "toilet", "cow", "bear")
 SPLITS = {"train", "val", "test"}
 SHA256 = re.compile(r"[0-9a-f]{64}\Z")
-REPO = Path(__file__).resolve().parents[1]
 
 
 def require(condition, message):
@@ -114,27 +113,6 @@ def check_waterbirds(root, seg_root):
         print(f"  {name}: total={sum(groups)}, groups(y0p0,y0p1,y1p0,y1p1)={groups}")
 
 
-def check_checkpoints(index, root, full):
-    with index.open(newline="", encoding="utf-8") as stream:
-        reader = csv.DictReader(stream)
-        required = {"id", "dataset", "architecture", "role", "seed", "source", "relative_path", "sha256"}
-        require(reader.fieldnames is not None and required <= set(reader.fieldnames), "Checkpoint index has missing columns")
-        rows = list(reader)
-    ids = set()
-    for row in rows:
-        require(row["id"] and row["id"] not in ids, f"Duplicate/empty checkpoint id: {row['id']}")
-        ids.add(row["id"])
-        require(row["role"] in ("teacher", "student"), f"Invalid checkpoint role: {row['id']}")
-        require(row["dataset"] and row["architecture"] and row["source"], f"Incomplete checkpoint row: {row['id']}")
-        require(row["seed"].isdigit(), f"Invalid checkpoint seed: {row['id']}")
-        require(SHA256.fullmatch(row["sha256"] or ""), f"Invalid checkpoint SHA-256: {row['id']}")
-        path = inside(root, row["relative_path"])
-        if full:
-            require(digest(path) == row["sha256"], f"Changed checkpoint: {row['id']}")
-    detail = (" (SHA-256 checked)" if full else " (file presence)") if rows else ""
-    print(f"Checkpoint index verified: {len(rows)} registered" + detail)
-
-
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
@@ -144,19 +122,12 @@ def main():
     waterbirds = sub.add_parser("waterbirds", help="check Waterbirds")
     waterbirds.add_argument("root", type=Path)
     waterbirds.add_argument("--seg-root", type=Path, help="also require CUB segmentation masks")
-    checkpoints = sub.add_parser("checkpoints", help="check checkpoint index")
-    checkpoints.add_argument("--index", type=Path, default=REPO / "checkpoints/index.csv")
-    checkpoints.add_argument("--root", type=Path, default=REPO / "checkpoints",
-                             help="base directory for registered weight files (default: repository checkpoints/)")
-    checkpoints.add_argument("--full", action="store_true", help="hash every registered weight")
     args = parser.parse_args()
     try:
         if args.command == "coco":
             check_coco(args.root, args.full)
         elif args.command == "waterbirds":
             check_waterbirds(args.root, args.seg_root)
-        else:
-            check_checkpoints(args.index, args.root, args.full)
     except (OSError, ValueError, KeyError, TypeError, json.JSONDecodeError) as exc:
         parser.exit(1, f"Asset check failed: {exc}\n")
 
