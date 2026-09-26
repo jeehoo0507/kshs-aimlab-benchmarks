@@ -38,11 +38,11 @@ def strict_candidates(info, classes=CLASSES):
         annotations[a["image_id"]].append(a)
     for image in sorted(info["images"], key=lambda x: x["id"]):
         anns = annotations[image["id"]]
-        kinds = {a["category_id"] for a in anns}
-        if len(kinds) != 1:
+        if len(anns) != 1:
             continue
-        name = category[next(iter(kinds))]
-        if name not in classes or any(a.get("iscrowd", 0) or a["area"] <= 0 or not a.get("segmentation") for a in anns):
+        annotation = anns[0]
+        name = category[annotation["category_id"]]
+        if name not in classes or annotation.get("iscrowd", 0) or annotation["area"] <= 0 or not annotation.get("segmentation"):
             continue
         yield image, classes.index(name), anns
 
@@ -188,9 +188,15 @@ def prepare(root, workers=4):
             info = json.loads(z.read(f"annotations/instances_{split}.json"))
             items.extend((split, *row) for row in strict_candidates(info))
     cache = root / "quality_records.json"
+    candidate_ids = [image["id"] for _, image, _, _ in items]
+    quality = None
     if cache.exists():
-        quality = json.loads(cache.read_text())
-    else:
+        cached = json.loads(cache.read_text())
+        if isinstance(cached, list):
+            by_id = {row.get("id", row.get("rejected_id")): row for row in cached}
+            if len(by_id) == len(cached) and all(image_id in by_id for image_id in candidate_ids):
+                quality = [by_id[image_id] for image_id in candidate_ids]
+    if quality is None:
         print(f"Checking and downloading {len(items)} COCO candidates (up to {workers} workers)", flush=True)
         with ThreadPoolExecutor(max_workers=min(4, max(1, workers))) as pool:
             quality = []
@@ -198,14 +204,15 @@ def prepare(root, workers=4):
                 quality.append(result)
                 if index % 500 == 0 or index == len(items):
                     print(f"  {index}/{len(items)} candidates", flush=True)
-        write_json(cache, quality)
+    write_json(cache, quality)
     records, duplicates = deduplicate([r for r in quality if "id" in r])
     images, ntrain, nval = make_splits(records)
     write_json(root / "quality_report.json", {"candidates": len(items), "duplicates": duplicates,
                "invalid": [r for r in quality if "rejected_id" in r], "train_per_class": ntrain,
                "val_per_class": nval, "test": sum(r["split"] == "test" for r in images),
                "near_duplicate_rule": "64-bit dHash Hamming <=4, plus decoded RGB SHA256"})
-    write_json(root / "manifest.json", {"schema": 1, "classes": list(CLASSES), "split_seed": 20260922,
+    write_json(root / "manifest.json", {"schema": 1, "selection": "one_annotated_instance_per_image",
+               "classes": list(CLASSES), "split_seed": 20260922,
                "transform": "full_image_resize224_flip_train_only", "annotations_sha256": digest(archive),
                "probe_per_class": 20, "images": images})
     check_coco(root, full=True)

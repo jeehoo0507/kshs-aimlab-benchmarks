@@ -2,15 +2,15 @@
 
 ![COCO instance segmentation examples](../../assets/coco-single.png)
 
-A 10-class classification subset of [COCO 2017](https://cocodataset.org/). Each image contains annotations from one category; multiple instances of that category are allowed.
+A 10-class classification subset of [COCO 2017](https://cocodataset.org/). Each selected image has exactly one annotated object instance from one of the ten classes.
 
 ## Protocol
 
 - **Classes:** `giraffe`, `airplane`, `clock`, `zebra`, `train`, `bird`, `elephant`, `toilet`, `cow`, `bear` (in this order).
 - **Train / validation:** Up to 600 / 100 images per class from `train2017`. If a class has fewer candidates, use the same lower count for every class.
 - **Probe:** 20 validation images per class. **Test:** eligible images from `val2017`. **Split seed:** `20260922`.
-- Exclude crowd, non-positive-area, and missing-segmentation annotations. Remove duplicates with identical decoded RGB hashes or a 64-bit dHash distance of at most 4.
-- Union all instance segmentations into one foreground mask. Resize images to 224×224; apply horizontal flips only during training. A 16×16 patch size gives 196 spatial tokens.
+- Exclude images with zero or multiple annotated objects, crowd annotations, non-positive-area annotations, or missing segmentation. Remove duplicates with identical decoded RGB hashes or a 64-bit dHash distance of at most 4.
+- Use the object's segmentation as the foreground mask. Resize images to 224×224; apply horizontal flips only during training. A 16×16 patch size gives 196 spatial tokens.
 
 ## Files
 
@@ -21,7 +21,7 @@ coco_single/
   masks/{train2017,val2017}/*.png
 ```
 
-The manifest records the class order and each image's `id`, `label`, `split`, `probe` flag, relative image/mask paths, and SHA-256 hashes. Downloaded data is written to the Git-ignored `data/coco_single/` directory.
+The manifest records the single-instance selection rule, class order, and each image's `id`, `label`, `split`, `probe` flag, image/mask paths, and SHA-256 hashes. Downloaded data is written to the Git-ignored `data/coco_single/` directory.
 
 ## Preparation
 
@@ -31,7 +31,7 @@ From the repository root:
 bash datasets/coco_single/setup.sh
 ```
 
-This installs the small data-preparation dependencies in `.venv-data/`, downloads the COCO 2017 annotations and eligible source images, builds foreground masks, removes duplicates, creates the documented train/validation/test split, and validates the result. It uses CPU only. Rerun the command to reuse a completed dataset or resume cached downloads. The preparation rule follows [aim-lab-test-2](https://github.com/jeehoo0507/aim-lab-test-2) (commit `0ee46e4`).
+This installs the data-preparation dependencies in `.venv-data/`, downloads the COCO 2017 annotations and eligible source images, builds foreground masks, removes duplicates, creates the documented train/validation/test split, and validates the result. It uses CPU only. Rerun the command to reuse a completed dataset or resume cached downloads. If `data/coco_single/` contains a dataset built with the previous single-category rule, move that directory aside before running setup. The pipeline is adapted from [aim-lab-test-2](https://github.com/jeehoo0507/aim-lab-test-2) (commit `0ee46e4`); the one-instance filter is defined here.
 
 ## Validation
 

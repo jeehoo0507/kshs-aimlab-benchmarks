@@ -11,7 +11,7 @@ Each command downloads data into `data/`, prepares the required structure, and v
 
 | Dataset | Setup result | Guide |
 | --- | --- | --- |
-| COCO single | Download COCO 2017 annotations and eligible images; generate masks and splits | [COCO single](coco_single/README.md) |
+| COCO single | Select one annotated object per image from 10 classes; generate masks and splits | [COCO single](coco_single/README.md) |
 | Waterbirds | Download the original group_DRO release; keep its provided splits | [Waterbirds](waterbirds/README.md) |
 
 Record the SHA-256 of the COCO manifest or Waterbirds metadata with every result to identify the exact split.

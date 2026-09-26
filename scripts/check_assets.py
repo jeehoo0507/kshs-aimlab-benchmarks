@@ -42,6 +42,8 @@ def digest(path):
 def check_coco(root, full):
     manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
     require(manifest.get("schema") == 1, "Unsupported COCO manifest schema")
+    require(manifest.get("selection") == "one_annotated_instance_per_image",
+            "COCO manifest uses an older selection rule; move the old dataset aside and rerun setup")
     require(tuple(manifest.get("classes", [])) == CLASSES, "COCO class order differs from documented definition")
     require(manifest.get("split_seed") == 20260922, "COCO split seed differs from documented definition")
     rows = manifest.get("images")
@@ -49,6 +51,7 @@ def check_coco(root, full):
     counts, probes, ids, decoded = Counter(), Counter(), set(), set()
     for row in rows:
         sample_id = row["id"]
+        require(row.get("instances") == 1, f"COCO image does not have exactly one annotated object: {sample_id}")
         split, label = row["split"], row["label"]
         require(split in SPLITS and type(label) is int and 0 <= label < len(CLASSES),
                 f"Invalid split/label: {sample_id}")
