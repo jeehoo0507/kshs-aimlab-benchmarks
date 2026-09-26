@@ -9,14 +9,14 @@
 A benchmark for comparing the performance of MaskedKD and new methods.
 [COCO single](datasets/coco_single/README.md) evaluates classification accuracy, while [Waterbirds](datasets/waterbirds/README.md) tests robustness to spurious correlations.
 
-## 데이터셋
+## Datasets
 
-| 데이터셋 | 평가 과제 | 주요 지표 |
+| Dataset | Task | Primary metric |
 | --- | --- | --- |
-| [COCO single](datasets/coco_single/README.md) | 10개 클래스 이미지 분류 | 매크로 정확도 |
-| [Waterbirds](datasets/waterbirds/README.md) | 배경과 라벨의 허위 상관관계 평가 | 최저 그룹 정확도 |
+| [COCO single](datasets/coco_single/README.md) | 10-class image classification | Macro accuracy |
+| [Waterbirds](datasets/waterbirds/README.md) | Spurious correlation robustness | Worst-group accuracy |
 
-원본 이미지는 포함하지 않습니다. 준비 및 검증 방법은 [데이터셋 안내](datasets/README.md)를 참고하세요.
+For data preparation and validation, see the [dataset guide](datasets/README.md).
 
 ## 시작하기
 
