@@ -11,7 +11,7 @@ from pathlib import Path
 
 
 CLASSES = ("giraffe", "airplane", "clock", "zebra", "train", "bird",
-           "elephant", "toilet", "cow", "bear")
+           "elephant", "toilet", "stop sign", "bear")
 SPLITS = {"train", "val", "test"}
 SHA256 = re.compile(r"[0-9a-f]{64}\Z")
 
@@ -44,7 +44,8 @@ def check_coco(root, full):
     require(manifest.get("schema") == 1, "Unsupported COCO manifest schema")
     require(manifest.get("selection") == "one_annotated_instance_per_image",
             "COCO manifest uses an older selection rule; move the old dataset aside and rerun setup")
-    require(tuple(manifest.get("classes", [])) == CLASSES, "COCO class order differs from documented definition")
+    require(tuple(manifest.get("classes", [])) == CLASSES,
+            "COCO class set differs; move the old dataset aside and rerun setup")
     require(manifest.get("split_seed") == 20260922, "COCO split seed differs from documented definition")
     rows = manifest.get("images")
     require(isinstance(rows, list) and rows, "COCO manifest has no images")

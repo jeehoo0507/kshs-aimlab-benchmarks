@@ -41,7 +41,7 @@ These commands check existing datasets; they do not download data.
 
 비교용 MaskedKD 가중치는 [체크포인트](checkpoints/README.md)에, 무작위 시드별 정확도와 학습 비용은 [결과](results/README.md)에 기록합니다. 실제 체크포인트와 결과는 아직 등록되지 않았습니다. 실험 전에는 [GPU 가이드](GPU.md)를 확인하세요.
 
-## 참고 자료
+## References
 
-- [MaskedKD 논문](https://arxiv.org/abs/2302.10494)
-- [MaskedKD 공식 구현](https://github.com/effl-lab/MaskedKD)
+- [MaskedKD paper](https://arxiv.org/abs/2302.10494)
+- [Official MaskedKD implementation](https://github.com/effl-lab/MaskedKD)

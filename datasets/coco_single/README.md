@@ -6,9 +6,9 @@ A 10-class classification subset of [COCO 2017](https://cocodataset.org/). Each 
 
 ## Protocol
 
-- **Classes:** `giraffe`, `airplane`, `clock`, `zebra`, `train`, `bird`, `elephant`, `toilet`, `cow`, `bear` (in this order).
-- **Train / validation:** Up to 600 / 100 images per class from `train2017`. If a class has fewer candidates, use the same lower count for every class.
-- **Probe:** 20 validation images per class. **Test:** eligible images from `val2017`. **Split seed:** `20260922`.
+- **Classes:** `giraffe`, `airplane`, `clock`, `zebra`, `train`, `bird`, `elephant`, `toilet`, `stop sign`, `bear` (in this order).
+- **Train / validation:** Balanced across classes using `train2017`. The verified split has 321 train and 53 validation images per class.
+- **Probe:** 20 validation images per class. **Test:** 297 eligible images from `val2017`. **Split seed:** `20260922`.
 - Exclude images with zero or multiple annotated objects, crowd annotations, non-positive-area annotations, or missing segmentation. Remove duplicates with identical decoded RGB hashes or a 64-bit dHash distance of at most 4.
 - Use the object's segmentation as the foreground mask. Resize images to 224×224; apply horizontal flips only during training. A 16×16 patch size gives 196 spatial tokens.
 
@@ -31,7 +31,7 @@ From the repository root:
 bash datasets/coco_single/setup.sh
 ```
 
-This installs the data-preparation dependencies in `.venv-data/`, downloads the COCO 2017 annotations and eligible source images, builds foreground masks, removes duplicates, creates the documented train/validation/test split, and validates the result. It uses CPU only. Rerun the command to reuse a completed dataset or resume cached downloads. If `data/coco_single/` contains a dataset built with the previous single-category rule, move that directory aside before running setup. The pipeline is adapted from [aim-lab-test-2](https://github.com/jeehoo0507/aim-lab-test-2) (commit `0ee46e4`); the one-instance filter is defined here.
+This installs the data-preparation dependencies in `.venv-data/`, downloads the COCO 2017 annotations and eligible source images, builds foreground masks, removes duplicates, creates the documented train/validation/test split, and validates the result. It uses CPU only. Rerun the command to reuse a completed dataset or resume cached downloads. If `data/coco_single/` contains an older dataset, move that directory aside before running setup. Models and results from the previous class set are not directly comparable. The pipeline is adapted from [aim-lab-test-2](https://github.com/jeehoo0507/aim-lab-test-2) (commit `0ee46e4`); the class and one-instance rules are defined here.
 
 ## Validation
 
