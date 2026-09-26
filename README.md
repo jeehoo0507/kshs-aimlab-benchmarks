@@ -18,7 +18,7 @@ A benchmark for comparing the performance of MaskedKD and new methods.
 
 For data preparation and validation, see the [dataset guide](datasets/README.md).
 
-## 시작하기
+## Getting Started
 
 ```bash
 git clone https://github.com/jeehoo0507/kshs-aimlab-benchmarks.git
@@ -26,16 +26,16 @@ cd kshs-aimlab-benchmarks
 bash scripts/fetch_maskedkd.sh
 ```
 
-MaskedKD 공식 코드를 가져옵니다. Python 의존성은 [공식 설치 안내](https://github.com/effl-lab/MaskedKD#installation)를 참고하세요.
+This fetches the official MaskedKD code. For Python dependencies, see the [official installation guide](https://github.com/effl-lab/MaskedKD#installation).
 
-### 데이터셋 검증
+### Dataset Validation
 
 ```bash
 python3 scripts/check_assets.py coco /path/to/coco_single
 python3 scripts/check_assets.py waterbirds /path/to/waterbird_complete95_forest2water2
 ```
 
-데이터셋 검사 명령은 다운로드를 수행하지 않습니다.
+These commands check existing datasets; they do not download data.
 
 ## 체크포인트와 결과
 
