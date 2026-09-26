@@ -4,8 +4,7 @@
 
 | 데이터셋 | 용도 | 자세한 구성 |
 | --- | --- | --- |
-| COCO single v1 | 10-class 분류 및 patch 선택 분석 | [coco_single_v1](coco_single_v1/README.md) |
-| Waterbirds v1 | 새 종류 × 배경의 허위 상관관계 평가 | [waterbirds_v1](waterbirds_v1/README.md) |
+| COCO single | 10-class 분류 및 patch 선택 분석 | [coco_single](coco_single/README.md) |
+| Waterbirds | 새 종류 × 배경의 허위 상관관계 평가 | [waterbirds](waterbirds/README.md) |
 
-`manifest.json`은 어떤 이미지가 어떤 라벨과 분할에 속하는지 적은 목록입니다. 같은 이름의 데이터셋이라도 이 목록이 다르면 별도 버전으로 취급합니다.
-
+`manifest.json`은 어떤 이미지가 어떤 라벨과 분할에 속하는지 적은 목록입니다. COCO single은 이 파일의 SHA-256, Waterbirds는 `metadata.csv`의 SHA-256으로 사용한 데이터 구성을 구분합니다.

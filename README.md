@@ -22,10 +22,10 @@ MaskedKD를 출발점으로 Vision Transformer 지식 증류의 **정확도와 �
 
 | Dataset | 평가 목적 | 주요 지표 |
 | --- | --- | --- |
-| [COCO single v1](datasets/coco_single_v1/README.md) | 10-class 분류와 patch 선택 | Macro accuracy |
-| [Waterbirds v1](datasets/waterbirds_v1/README.md) | 새 종류·배경 간 허위 상관관계 | Worst-group accuracy |
+| [COCO single](datasets/coco_single/README.md) | 10-class 분류와 patch 선택 | Macro accuracy |
+| [Waterbirds](datasets/waterbirds/README.md) | 새 종류·배경 간 허위 상관관계 | Worst-group accuracy |
 
-이미지와 모델 가중치는 Git에 포함하지 않습니다. 각 데이터셋 문서에 구성과 필요한 파일을 적고, 체크포인트는 해시와 출처로 관리합니다.
+원본 데이터 이미지와 모델 가중치는 Git에 포함하지 않습니다. 각 데이터셋 문서에 구성과 필요한 파일을 적고, 체크포인트는 해시와 출처로 관리합니다.
 
 ## Getting started
 

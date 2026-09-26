@@ -1,4 +1,8 @@
-# Waterbirds v1
+# Waterbirds
+
+![새 종류와 배경 조합으로 나뉜 Waterbirds의 네 그룹 예시](representative.png)
+
+Waterbirds의 새 종류 × 배경 조합을 보여 주는 예시입니다. 그림에 적힌 샘플 수는 실제 준비한 데이터의 수를 대신하지 않으므로 `metadata.csv`에서 확인합니다.
 
 [원본 Waterbirds](https://github.com/kohpangwei/group_DRO#waterbirds)는 CUB 새 이미지를 Places 배경에 합성한 데이터입니다. 새 라벨 `y`(landbird/waterbird)와 배경 `place`(land/water)를 조합한 **4개 그룹**으로 봅니다. 원본 `metadata.csv`의 `split` 0/1/2를 train/validation/test로 사용합니다. Train은 배경과 라벨의 상관관계가 강하고, validation/test는 그룹 비율이 다르므로 평가 시 그룹별 정확도와 worst-group accuracy를 함께 보고합니다.
 
@@ -20,4 +24,3 @@ python3 scripts/check_assets.py waterbirds /absolute/path/to/waterbird_complete9
 ```
 
 첫 명령은 metadata, 이미지, 분할·그룹을 확인합니다. 두 번째는 FG/BG 분석용 mask 존재 여부도 확인합니다.
-

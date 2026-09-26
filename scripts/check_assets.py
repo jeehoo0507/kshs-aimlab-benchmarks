@@ -43,8 +43,8 @@ def digest(path):
 def check_coco(root, full):
     manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
     require(manifest.get("schema") == 1, "Unsupported COCO manifest schema")
-    require(tuple(manifest.get("classes", [])) == CLASSES, "COCO class order differs from v1")
-    require(manifest.get("split_seed") == 20260922, "COCO split seed differs from v1")
+    require(tuple(manifest.get("classes", [])) == CLASSES, "COCO class order differs from documented definition")
+    require(manifest.get("split_seed") == 20260922, "COCO split seed differs from documented definition")
     rows = manifest.get("images")
     require(isinstance(rows, list) and rows, "COCO manifest has no images")
     counts, probes, ids, decoded = Counter(), Counter(), set(), set()
@@ -80,7 +80,7 @@ def check_coco(root, full):
                 f"Unbalanced COCO {split} split")
     require(all(probes[label] == 20 for label in range(len(CLASSES))),
             "COCO probe should contain 20 validation images per class")
-    print("COCO single v1 verified" + (" (SHA-256 checked)" if full else " (file presence)"))
+    print("COCO single verified" + (" (SHA-256 checked)" if full else " (file presence)"))
     print("  " + ", ".join(f"{split}={sum(counts[split, c] for c in range(10))}" for split in ("train", "val", "test")))
     print("  train/val per class:", counts["train", 0], counts["val", 0], "; probe=20 per class")
 
@@ -108,7 +108,7 @@ def check_waterbirds(root, seg_root):
     for split in (0, 1, 2):
         require(all(counts[split, y, p] > 0 for y in (0, 1) for p in (0, 1)),
                 f"Missing Waterbirds group in split {split}")
-    print("Waterbirds v1 verified" + (" (including segmentation)" if seg_root else " (images only)"))
+    print("Waterbirds verified" + (" (including segmentation)" if seg_root else " (images only)"))
     for split, name in ((0, "train"), (1, "val"), (2, "test")):
         groups = [counts[split, y, p] for y in (0, 1) for p in (0, 1)]
         print(f"  {name}: total={sum(groups)}, groups(y0p0,y0p1,y1p0,y1p1)={groups}")
@@ -141,10 +141,10 @@ def check_checkpoints(index, root, full):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
-    coco = sub.add_parser("coco", help="check COCO single v1")
+    coco = sub.add_parser("coco", help="check COCO single")
     coco.add_argument("root", type=Path)
     coco.add_argument("--full", action="store_true", help="hash every image and mask")
-    waterbirds = sub.add_parser("waterbirds", help="check Waterbirds v1")
+    waterbirds = sub.add_parser("waterbirds", help="check Waterbirds")
     waterbirds.add_argument("root", type=Path)
     waterbirds.add_argument("--seg-root", type=Path, help="also require CUB segmentation masks")
     checkpoints = sub.add_parser("checkpoints", help="check checkpoint index")
