@@ -1,1 +1,1 @@
-dataset,data_sha256,method,teacher_id,student_arch,student_init,keep_patches,seed,eval_split,checkpoint,metric,value,train_hours,peak_vram_gib,code_commit,run_ref
+dataset,data_sha256,method,teacher_sha256,pretrained_sha256,student_arch,student_init,keep_patches,seed,epochs,selection_metric,best_epoch,val_score,test_primary,test_overall,last_test_primary,last_test_overall,train_hours,wall_hours,peak_vram_gib,samples_per_second,gpu,parallel_jobs,checkpoint_sha256,code_sha256,code_commit,run_ref

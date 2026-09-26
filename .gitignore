@@ -6,5 +6,6 @@
 /checkpoints/_local/
 /.venv/
 /.venv-data/
+/.cache/
 __pycache__/
 *.pyc

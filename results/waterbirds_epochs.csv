@@ -1,0 +1,1 @@
+dataset,method,seed,epoch,lr,train_loss,train_ce,train_kd,train_accuracy,val_primary,val_overall,train_seconds,epoch_seconds

@@ -39,6 +39,10 @@ python3 scripts/check_assets.py waterbirds /path/to/waterbird_complete95_forest2
 
 이 명령은 이미 준비된 데이터셋을 확인하며, 다운로드는 수행하지 않습니다.
 
+## MaskedKD 기준 실험
+
+GPU 서버에서 `bash scripts/run_reference.sh --dataset coco`를 실행한 뒤 `bash scripts/run_reference.sh --dataset waterbirds`를 실행합니다. 학습 환경과 없는 데이터셋을 준비하고, 기준 모델을 학습해 결과 CSV를 채웁니다. 기존 데이터 경로 지정, GPU 작업 수, 중단 후 재개 방법은 [실행 안내](reference/README.md)를 참고하세요.
+
 ## 체크포인트
 
 직접 학습한 비교용 MaskedKD 체크포인트를 [`checkpoints/coco/`](checkpoints/coco/)와 [`checkpoints/waterbirds/`](checkpoints/waterbirds/)에 추가할 예정입니다.
@@ -48,7 +52,7 @@ python3 scripts/check_assets.py waterbirds /path/to/waterbird_complete95_forest2
 - [COCO single CSV](results/coco.csv): seed별 macro accuracy와 학습 비용.
 - [Waterbirds CSV](results/waterbirds.csv): seed별 worst-group accuracy와 학습 비용.
 
-현재 CSV에는 헤더만 있으며, 측정 결과는 나중에 추가합니다.
+기준 실험이 끝나면 CSV에 측정 결과가 추가됩니다.
 
 ## 참고 자료
 

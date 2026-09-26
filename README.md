@@ -39,6 +39,10 @@ python3 scripts/check_assets.py waterbirds /path/to/waterbird_complete95_forest2
 
 These commands check existing datasets; they do not download data.
 
+## Run the MaskedKD Reference
+
+On the GPU server, run `bash scripts/run_reference.sh --dataset coco` and then `bash scripts/run_reference.sh --dataset waterbirds`. The commands install the training environment, prepare missing datasets, train the baseline, and fill the result CSVs. See the [reference run guide](reference/README.md) for existing-data paths, GPU scheduling, and resume behavior.
+
 ## Checkpoints
 
 Author-trained MaskedKD reference checkpoints will be added under [`checkpoints/coco/`](checkpoints/coco/) and [`checkpoints/waterbirds/`](checkpoints/waterbirds/).
@@ -48,7 +52,7 @@ Author-trained MaskedKD reference checkpoints will be added under [`checkpoints/
 - [COCO single CSV](results/coco.csv): per-seed macro accuracy and training cost.
 - [Waterbirds CSV](results/waterbirds.csv): per-seed worst-group accuracy and training cost.
 
-The CSV files contain headers only; measured results will be added later.
+The CSV files contain headers only until the reference runs finish.
 
 ## References
 

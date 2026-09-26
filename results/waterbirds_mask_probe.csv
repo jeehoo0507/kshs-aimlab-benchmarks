@@ -1,0 +1,1 @@
+dataset,method,seed,epoch,n,teacher_full_accuracy,teacher_masked_accuracy,full_correct_masked_wrong,kl_full_to_masked,foreground_recall,foreground_precision,foreground_images,selection_overlap_initial,selection_overlap_previous
