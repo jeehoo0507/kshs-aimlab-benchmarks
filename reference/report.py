@@ -149,7 +149,7 @@ def export(output_root, dataset, seeds=(0, 1, 2), publish_checkpoint=True):
     write_csv(destination / f"{dataset}_summary.csv", SUMMARY_FIELDS, summary)
     representative = run_directory(output_root, dataset, "student", 0) / "best.pt"
     if publish_checkpoint and representative.exists():
-        destination = ROOT / "checkpoints" / dataset / "maskedkd_seed0.pt"
+        destination = ROOT / "checkpoints" / dataset / "maskedkd.pt"
         destination.parent.mkdir(parents=True, exist_ok=True)
         if destination.exists() and sha256(destination) != sha256(representative):
             raise ValueError(f"Existing published checkpoint differs: {destination}")
