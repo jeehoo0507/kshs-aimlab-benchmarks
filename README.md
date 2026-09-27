@@ -55,10 +55,18 @@ The [checkpoint guide](checkpoints/README.md) also provides a command to downloa
 
 ## Results
 
-- [COCO single results](results/coco/runs.csv): per-seed macro accuracy and training cost.
-- [Waterbirds results](results/waterbirds/runs.csv): per-seed worst-group accuracy and training cost.
+Measured MaskedKD results use a DeiT-Small teacher and DeiT-Tiny students (seeds 0, 1, 2). COCO's primary metric is macro accuracy; Waterbirds' is worst-group accuracy.
 
-The [results guide](results/README.md) links the three-seed summaries, per-class/group accuracy, learning curves, and mask diagnostics.
+| Result | COCO single | Waterbirds | What it shows |
+| --- | --- | --- | --- |
+| Runs | [CSV](results/coco/runs.csv) | [CSV](results/waterbirds/runs.csv) | Validation-selected test scores by seed, training time, peak VRAM, and run provenance. |
+| Summary | [CSV](results/coco/summary.csv) | [CSV](results/waterbirds/summary.csv) | Three-seed mean and standard deviation, plus isolated seed-0 training cost. |
+| Epochs | [CSV](results/coco/epochs.csv) | [CSV](results/waterbirds/epochs.csv) | Training loss and validation accuracy across epochs. |
+| Class / group | [Per-class CSV](results/coco/per_class.csv) | [Per-group CSV](results/waterbirds/per_group.csv) | Test accuracy by COCO class or Waterbirds bird/background group. |
+| Validation masks | [CSV](results/coco/mask_validation.csv) | [CSV](results/waterbirds/mask_validation.csv) | Patch-selection changes, foreground coverage, and teacher/student prediction differences over training. |
+| Test masks | [CSV](results/coco/mask_test.csv) | [CSV](results/waterbirds/mask_test.csv) | The selected checkpoint's foreground coverage and prediction disagreement among the student, full teacher, and masked teacher. |
+
+See the [results guide](results/README.md) for metric definitions and comparison conditions.
 
 ## References
 
