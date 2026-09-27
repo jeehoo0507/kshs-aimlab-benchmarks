@@ -1,5 +1,7 @@
 # ImageNet-1K (ILSVRC2012)
 
+English · [한국어](../../docs/ko/datasets/imagenet/README.md)
+
 <p align="center">
   <img src="../../assets/imagenet.png" alt="ImageNet image mosaic" width="750">
 </p>

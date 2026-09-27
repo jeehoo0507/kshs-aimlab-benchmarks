@@ -1,5 +1,7 @@
 # Results
 
+English · [한국어](../docs/ko/results/README.md)
+
 These CSVs contain the measured MaskedKD reference runs for COCO single and Waterbirds: one teacher and three student seeds per dataset. The training code and protocol are in the [reference-run branch](https://github.com/jeehoo0507/kshs-aimlab-benchmarks/tree/codex/maskedkd-reference-runs/reference). Each file includes a `method` column for later comparisons.
 
 Results are grouped by dataset under [`coco/`](coco/) and [`waterbirds/`](waterbirds/).

@@ -1,5 +1,7 @@
 # Checkpoints
 
+English · [한국어](../docs/ko/checkpoints/README.md)
+
 MaskedKD checkpoints trained by the author for baseline comparison.
 
 ```text

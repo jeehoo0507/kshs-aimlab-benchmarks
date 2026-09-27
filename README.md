@@ -2,7 +2,7 @@
   <img src="assets/kshs-aimlab-lockup-balanced.png" alt="강원과학고등학교 × AIM Lab" width="640">
 </p>
 
-<p align="center"><a href="README.md">English</a> · <a href="README.ko.md">한국어</a></p>
+<p align="center"><a href="README.md">English</a> · <a href="docs/ko/README.md">한국어</a></p>
 
 <h1 align="center">KSHS × AIM Lab Benchmarks</h1>
 

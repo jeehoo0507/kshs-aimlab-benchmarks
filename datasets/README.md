@@ -1,5 +1,7 @@
 # Datasets
 
+English · [한국어](../docs/ko/datasets/README.md)
+
 Dataset images and masks are not stored in Git. Run the setup commands from the repository root:
 
 ```bash
