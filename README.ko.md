@@ -42,6 +42,7 @@ python3 scripts/check_assets.py waterbirds /path/to/waterbird_complete95_forest2
 ## 체크포인트
 
 직접 학습한 비교용 MaskedKD 체크포인트는 [COCO single](checkpoints/coco/maskedkd_coco.pt)과 [Waterbirds](checkpoints/waterbirds/maskedkd_waterbirds.pt)에 있습니다.
+[체크포인트 안내](checkpoints/README.md)에는 공식 ImageNet 사전학습 DeiT-Tiny·Small·Base 가중치 다운로드 명령도 있습니다.
 
 ## 결과
 
