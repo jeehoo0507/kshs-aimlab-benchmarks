@@ -1,0 +1,41 @@
+dataset,method,seed,class_index,class_name,correct,n,accuracy
+coco,teacher,0,0,giraffe,26,26,1.0
+coco,teacher,0,1,airplane,41,41,1.0
+coco,teacher,0,2,clock,44,45,0.9777777777777777
+coco,teacher,0,3,zebra,15,15,1.0
+coco,teacher,0,4,train,41,41,1.0
+coco,teacher,0,5,bird,31,31,1.0
+coco,teacher,0,6,elephant,9,10,0.9
+coco,teacher,0,7,toilet,41,42,0.9761904761904762
+coco,teacher,0,8,stop sign,22,22,1.0
+coco,teacher,0,9,bear,24,24,1.0
+coco,maskedkd,0,0,giraffe,26,26,1.0
+coco,maskedkd,0,1,airplane,40,41,0.975609756097561
+coco,maskedkd,0,2,clock,44,45,0.9777777777777777
+coco,maskedkd,0,3,zebra,15,15,1.0
+coco,maskedkd,0,4,train,41,41,1.0
+coco,maskedkd,0,5,bird,27,31,0.8709677419354839
+coco,maskedkd,0,6,elephant,10,10,1.0
+coco,maskedkd,0,7,toilet,42,42,1.0
+coco,maskedkd,0,8,stop sign,22,22,1.0
+coco,maskedkd,0,9,bear,24,24,1.0
+coco,maskedkd,1,0,giraffe,26,26,1.0
+coco,maskedkd,1,1,airplane,40,41,0.975609756097561
+coco,maskedkd,1,2,clock,45,45,1.0
+coco,maskedkd,1,3,zebra,15,15,1.0
+coco,maskedkd,1,4,train,40,41,0.975609756097561
+coco,maskedkd,1,5,bird,31,31,1.0
+coco,maskedkd,1,6,elephant,9,10,0.9
+coco,maskedkd,1,7,toilet,41,42,0.9761904761904762
+coco,maskedkd,1,8,stop sign,22,22,1.0
+coco,maskedkd,1,9,bear,24,24,1.0
+coco,maskedkd,2,0,giraffe,26,26,1.0
+coco,maskedkd,2,1,airplane,40,41,0.975609756097561
+coco,maskedkd,2,2,clock,44,45,0.9777777777777777
+coco,maskedkd,2,3,zebra,15,15,1.0
+coco,maskedkd,2,4,train,41,41,1.0
+coco,maskedkd,2,5,bird,30,31,0.967741935483871
+coco,maskedkd,2,6,elephant,8,10,0.8
+coco,maskedkd,2,7,toilet,42,42,1.0
+coco,maskedkd,2,8,stop sign,22,22,1.0
+coco,maskedkd,2,9,bear,24,24,1.0

@@ -45,10 +45,10 @@ Author-trained MaskedKD reference checkpoints are available for [COCO single](ch
 
 ## Results
 
-- [COCO single CSV](results/coco.csv): per-seed macro accuracy and training cost.
-- [Waterbirds CSV](results/waterbirds.csv): per-seed worst-group accuracy and training cost.
+- [COCO single results](results/coco.csv): per-seed macro accuracy and training cost.
+- [Waterbirds results](results/waterbirds.csv): per-seed worst-group accuracy and training cost.
 
-The CSV files contain headers only; measured results will be added later.
+The [results guide](results/README.md) links the three-seed summaries, per-class/group accuracy, learning curves, and mask diagnostics.
 
 ## References
 

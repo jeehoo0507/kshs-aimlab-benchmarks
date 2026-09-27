@@ -45,10 +45,10 @@ python3 scripts/check_assets.py waterbirds /path/to/waterbird_complete95_forest2
 
 ## 결과
 
-- [COCO single CSV](results/coco.csv): seed별 macro accuracy와 학습 비용.
-- [Waterbirds CSV](results/waterbirds.csv): seed별 worst-group accuracy와 학습 비용.
+- [COCO single 결과](results/coco.csv): seed별 macro accuracy와 학습 비용.
+- [Waterbirds 결과](results/waterbirds.csv): seed별 worst-group accuracy와 학습 비용.
 
-현재 CSV에는 헤더만 있으며, 측정 결과는 나중에 추가합니다.
+[결과 안내](results/README.md)에서 3개 seed 요약, 클래스·그룹별 정확도, 학습 곡선과 마스킹 진단을 볼 수 있습니다.
 
 ## 참고 자료
 

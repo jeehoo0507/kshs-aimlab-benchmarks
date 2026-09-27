@@ -8,4 +8,4 @@ checkpoints/
 └── waterbirds/maskedkd_seed0.pt
 ```
 
-Training details will be added later.
+See the [measured results](../results/README.md) and [reference-run protocol](https://github.com/jeehoo0507/kshs-aimlab-benchmarks/tree/codex/maskedkd-reference-runs/reference).
