@@ -42,7 +42,15 @@ These commands check existing datasets; they do not download data.
 
 ## Checkpoints
 
-Author-trained MaskedKD reference checkpoints are available for [COCO single](checkpoints/coco/maskedkd_coco.pt) and [Waterbirds](checkpoints/waterbirds/maskedkd_waterbirds.pt).
+The current MaskedKD checkpoints contain **DeiT-Tiny student** weights distilled from a DeiT-Small teacher. DeiT-Small student checkpoints will be added later.
+
+| Student | Dataset (checkpoint) |
+| --- | --- |
+| DeiT-Tiny | [COCO single](checkpoints/coco/maskedkd_coco.pt) |
+| DeiT-Tiny | [Waterbirds](checkpoints/waterbirds/maskedkd_waterbirds.pt) |
+| DeiT-Small | — |
+| DeiT-Small | — |
+
 The [checkpoint guide](checkpoints/README.md) also provides a command to download official ImageNet-pretrained DeiT-Tiny, Small, and Base weights.
 
 ## Results
