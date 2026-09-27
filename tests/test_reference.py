@@ -148,9 +148,10 @@ def test_auto_jobs_respects_measured_vram(monkeypatch):
     import reference.cli as cli
     monkeypatch.setattr(cli, "benchmark_memory", lambda args: 5.0)
     monkeypatch.setattr(cli, "free_gib", lambda: 18.0)
-    assert cli.choose_jobs(SimpleNamespace(device="cuda", jobs="auto"))[0] == 2
+    config = Path(__file__).resolve().parents[1] / "configs/reference.json"
+    assert cli.choose_jobs(SimpleNamespace(device="cuda", jobs="auto", config=config))[0] == 2
     with pytest.raises(ValueError, match="safe maximum=2"):
-        cli.choose_jobs(SimpleNamespace(device="cuda", jobs="3"))
+        cli.choose_jobs(SimpleNamespace(device="cuda", jobs="3", config=config))
     monkeypatch.setattr(cli, "benchmark_memory", lambda args, role="student": 5.0)
     cli.check_teacher_memory(SimpleNamespace())
     monkeypatch.setattr(cli, "free_gib", lambda: 8.0)

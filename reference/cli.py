@@ -11,6 +11,8 @@ from pathlib import Path
 import torch
 from torch.nn import functional as F
 
+from scripts.gpu_capacity import GLOBAL_RESERVE_GIB, job_budget_gib, memory_job_limit
+
 from .engine import ROOT, load_checkpoint, run_directory, train_run
 from .model import URLS, build_model
 from .report import export
@@ -125,7 +127,7 @@ def benchmark_memory(args, role="student"):
 def check_teacher_memory(args):
     peak = benchmark_memory(args, "teacher")
     available = free_gib()
-    required = peak * 1.25 + 3.0
+    required = job_budget_gib(peak) + GLOBAL_RESERVE_GIB
     if available < required:
         raise RuntimeError(f"Teacher needs at least {required:.1f} GiB free by the measured "
                            f"VRAM budget; only {available:.1f} GiB is free")
@@ -137,18 +139,20 @@ def choose_jobs(args):
         return 1, 0
     peak = benchmark_memory(args)
     # The margin includes allocator variability, CUDA contexts, and other jobs.
-    reserve_per_job = peak * 1.25 + 0.5
+    reserve_per_job = job_budget_gib(peak)
     available = free_gib()
-    safe = max(0, min(2, int((available - 2.5) // reserve_per_job)))
+    memory_capacity = memory_job_limit(available, peak)
+    pending_jobs = len(load_config(args.config)["seeds"]) - 1
+    safe = min(memory_capacity, pending_jobs)
     if safe < 1:
         raise RuntimeError(f"Insufficient free GPU memory: {available:.1f} GiB free; "
-                           f"estimated {reserve_per_job:.1f} GiB/job plus 2.5 GiB reserve")
+                           f"estimated {reserve_per_job:.1f} GiB/job plus {GLOBAL_RESERVE_GIB:.1f} GiB reserve")
     requested = safe if args.jobs == "auto" else int(args.jobs)
     if requested < 1 or requested > safe:
         raise ValueError(f"Requested jobs={requested}, measured safe maximum={safe}; "
                          "do not override the GPU memory reserve")
     print(f"VRAM benchmark peak={peak:.2f} GiB; free={available:.2f} GiB; "
-          f"safe jobs={safe}; launching {requested}", flush=True)
+          f"memory capacity={memory_capacity}; pending={pending_jobs}; launching {requested}", flush=True)
     return requested, reserve_per_job
 
 
@@ -160,7 +164,7 @@ def run_students(args, jobs, reserve_per_job):
     try:
         while pending or active:
             while pending and len(active) < jobs:
-                if args.device == "cuda" and free_gib() < reserve_per_job + 2.5:
+                if args.device == "cuda" and free_gib() < reserve_per_job + GLOBAL_RESERVE_GIB:
                     if active:
                         break
                     raise RuntimeError("Free GPU memory fell below the per-job reserve; retry later")
@@ -306,7 +310,7 @@ def main():
         check_teacher_memory(args)
         run_teacher(args)
         jobs, reserve = choose_jobs(args)
-        if free_gib() < reserve + 2.5:
+        if free_gib() < reserve + GLOBAL_RESERVE_GIB:
             raise RuntimeError("Free GPU memory fell below the isolated-student reserve; retry later")
         run_seed_zero(args)
         run_students(args, jobs, reserve)
