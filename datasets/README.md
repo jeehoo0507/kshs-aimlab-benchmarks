@@ -5,10 +5,10 @@ Dataset images and masks are not stored in Git. Run the setup commands from the 
 ```bash
 bash datasets/coco_single/setup.sh
 bash datasets/waterbirds/setup.sh
-bash datasets/imagenet/setup.sh /path/to/official-archives
+bash datasets/imagenet/setup.sh
 ```
 
-COCO single and Waterbirds download their source data. ImageNet requires the three official train, validation, and devkit archives to be downloaded with your ImageNet account first. Setup commands prepare data in `data/` by default and validate it.
+COCO single and Waterbirds download their source data. ImageNet requires the three official train, validation, and devkit archives to be downloaded with your ImageNet account and placed in `data/imagenet/archives/` first. Setup commands prepare data in `data/` by default and validate it.
 
 | Dataset | Setup result | Guide |
 | --- | --- | --- |
