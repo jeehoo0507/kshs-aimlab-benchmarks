@@ -1,5 +1,7 @@
 # Waterbirds
 
+English · [한국어](../../docs/ko/datasets/waterbirds/README.md)
+
 <p align="center">
   <img src="../../assets/waterbirds.png" alt="Waterbirds groups by bird type and background" width="595">
 </p>

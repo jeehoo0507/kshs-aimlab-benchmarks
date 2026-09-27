@@ -1,5 +1,7 @@
 # COCO single
 
+English · [한국어](../../docs/ko/datasets/coco_single/README.md)
+
 ![COCO instance segmentation examples](../../assets/coco-single.png)
 
 A 10-class classification subset of [COCO 2017](https://cocodataset.org/). Each selected image has exactly one annotated object instance from one of the ten classes.

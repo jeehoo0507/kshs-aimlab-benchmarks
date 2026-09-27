@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="assets/kshs-aimlab-lockup-balanced.png" alt="강원과학고등학교 × AIM Lab" width="640">
+  <img src="../../assets/kshs-aimlab-lockup-balanced.png" alt="강원과학고등학교 × AIM Lab" width="640">
 </p>
 
-<p align="center"><a href="README.md">English</a> · <a href="README.ko.md">한국어</a></p>
+<p align="center"><a href="../../README.md">English</a> · <a href="README.md">한국어</a></p>
 
 <h1 align="center">KSHS × AIM Lab Benchmarks</h1>
 
@@ -46,8 +46,8 @@ python3 scripts/check_assets.py waterbirds /path/to/waterbird_complete95_forest2
 
 | Student | 데이터셋 (체크포인트) |
 | --- | --- |
-| DeiT-Tiny | [COCO single](checkpoints/coco/maskedkd_coco.pt) |
-| DeiT-Tiny | [Waterbirds](checkpoints/waterbirds/maskedkd_waterbirds.pt) |
+| DeiT-Tiny | [COCO single](../../checkpoints/coco/maskedkd_coco.pt) |
+| DeiT-Tiny | [Waterbirds](../../checkpoints/waterbirds/maskedkd_waterbirds.pt) |
 | DeiT-Small | — |
 | DeiT-Small | — |
 
@@ -59,12 +59,12 @@ DeiT-Small Teacher와 DeiT-Tiny Student(seed 0, 1, 2)로 측정한 MaskedKD 결�
 
 | 항목 | COCO single | Waterbirds | 내용 |
 | --- | --- | --- | --- |
-| 실행별 결과 | [CSV](results/coco/runs.csv) | [CSV](results/waterbirds/runs.csv) | seed별 validation 선택 checkpoint의 test 점수, 학습 시간, 최대 VRAM, 실행 정보. |
-| 요약 | [CSV](results/coco/summary.csv) | [CSV](results/waterbirds/summary.csv) | 3개 seed의 평균·표준편차와 단독 실행한 seed 0의 학습 비용. |
-| Epoch 기록 | [CSV](results/coco/epochs.csv) | [CSV](results/waterbirds/epochs.csv) | epoch별 학습 loss와 validation 정확도. |
-| 클래스·그룹별 | [클래스 CSV](results/coco/per_class.csv) | [그룹 CSV](results/waterbirds/per_group.csv) | COCO 클래스별 또는 Waterbirds 새 종류·배경 그룹별 test 정확도. |
-| Validation 마스크 | [CSV](results/coco/mask_validation.csv) | [CSV](results/waterbirds/mask_validation.csv) | 학습 중 패치 선택 변화, 전경 포함률, Teacher·Student 예측 차이. |
-| Test 마스크 | [CSV](results/coco/mask_test.csv) | [CSV](results/waterbirds/mask_test.csv) | 선택된 checkpoint의 전경 포함률과 Student·전체 Teacher·마스킹 Teacher 간 예측 불일치. |
+| 실행별 결과 | [CSV](../../results/coco/runs.csv) | [CSV](../../results/waterbirds/runs.csv) | seed별 validation 선택 checkpoint의 test 점수, 학습 시간, 최대 VRAM, 실행 정보. |
+| 요약 | [CSV](../../results/coco/summary.csv) | [CSV](../../results/waterbirds/summary.csv) | 3개 seed의 평균·표준편차와 단독 실행한 seed 0의 학습 비용. |
+| Epoch 기록 | [CSV](../../results/coco/epochs.csv) | [CSV](../../results/waterbirds/epochs.csv) | epoch별 학습 loss와 validation 정확도. |
+| 클래스·그룹별 | [클래스 CSV](../../results/coco/per_class.csv) | [그룹 CSV](../../results/waterbirds/per_group.csv) | COCO 클래스별 또는 Waterbirds 새 종류·배경 그룹별 test 정확도. |
+| Validation 마스크 | [CSV](../../results/coco/mask_validation.csv) | [CSV](../../results/waterbirds/mask_validation.csv) | 학습 중 패치 선택 변화, 전경 포함률, Teacher·Student 예측 차이. |
+| Test 마스크 | [CSV](../../results/coco/mask_test.csv) | [CSV](../../results/waterbirds/mask_test.csv) | 선택된 checkpoint의 전경 포함률과 Student·전체 Teacher·마스킹 Teacher 간 예측 불일치. |
 
 지표 정의와 비교 조건은 [결과 안내](results/README.md)를 참고하세요.
 
