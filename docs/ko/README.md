@@ -40,6 +40,8 @@ python3 scripts/check_assets.py waterbirds /path/to/waterbird_complete95_forest2
 
 이 명령은 이미 준비된 데이터셋을 확인하며, 다운로드는 수행하지 않습니다.
 
+학습 전에는 [GPU 가이드](GPU.md)에서 메모리 확인과 병렬 작업 수 산정 방법을 확인하세요.
+
 ## 체크포인트
 
 현재 MaskedKD 체크포인트는 DeiT-Small Teacher로 증류한 **DeiT-Tiny Student** 가중치입니다. DeiT-Small Student 체크포인트는 추후 추가할 예정입니다.
