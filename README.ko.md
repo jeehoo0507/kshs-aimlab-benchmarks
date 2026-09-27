@@ -41,7 +41,7 @@ python3 scripts/check_assets.py waterbirds /path/to/waterbird_complete95_forest2
 
 ## 체크포인트
 
-직접 학습한 비교용 MaskedKD 체크포인트를 [`checkpoints/coco/`](checkpoints/coco/)와 [`checkpoints/waterbirds/`](checkpoints/waterbirds/)에 추가할 예정입니다.
+직접 학습한 비교용 MaskedKD 체크포인트는 [COCO single](checkpoints/coco/maskedkd_seed0.pt)과 [Waterbirds](checkpoints/waterbirds/maskedkd_seed0.pt)에 있습니다.
 
 ## 결과
 
