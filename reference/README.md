@@ -1,5 +1,7 @@
 # MaskedKD reference run
 
+English · [한국어](../docs/ko/reference/README.md)
+
 This runner creates the **DeiT-S → DeiT-Tiny** reference for COCO single and Waterbirds on one CUDA GPU. It implements the student-attention top-98 teacher mask used by MaskedKD; it is an adaptation to these two classification datasets, not a reproduction of the paper's ImageNet-1K DeiT-B → DeiT-S experiment. The [official MaskedKD source](https://github.com/effl-lab/MaskedKD) remains available through `scripts/fetch_maskedkd.sh` for inspection.
 
 From a fresh clone of this branch on the GPU server:
