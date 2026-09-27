@@ -69,7 +69,7 @@ def test_cpu_reference_train_resume_and_csv(tmp_path, monkeypatch):
     with (tmp_path / "results/coco/summary.csv").open() as stream:
         summary = list(csv.DictReader(stream))
     assert len(summary) == 1 and summary[0]["seeds"] == "0|1|2"
-    assert (tmp_path / "checkpoints/coco/maskedkd.pt").is_file()
+    assert (tmp_path / "checkpoints/coco/maskedkd_coco.pt").is_file()
     with (tmp_path / "results/coco/mask_validation.csv").open() as stream:
         assert {int(row["epoch"]) for row in csv.DictReader(stream)} == {0, 1}
     with (tmp_path / "results/coco/mask_test.csv").open() as stream:

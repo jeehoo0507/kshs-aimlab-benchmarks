@@ -41,7 +41,7 @@ These commands check existing datasets; they do not download data.
 
 ## Checkpoints
 
-Author-trained MaskedKD reference checkpoints are available for [COCO single](checkpoints/coco/maskedkd.pt) and [Waterbirds](checkpoints/waterbirds/maskedkd.pt).
+Author-trained MaskedKD reference checkpoints are available for [COCO single](checkpoints/coco/maskedkd_coco.pt) and [Waterbirds](checkpoints/waterbirds/maskedkd_waterbirds.pt).
 
 ## Results
 
