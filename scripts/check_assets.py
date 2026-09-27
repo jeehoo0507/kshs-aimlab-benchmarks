@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Validate COCO single and Waterbirds datasets without GPU dependencies."""
+"""Validate prepared COCO single, Waterbirds, and ImageNet datasets."""
 
 import argparse
 import csv
 import hashlib
 import json
+import os
 import re
 from collections import Counter
 from pathlib import Path
@@ -14,6 +15,9 @@ CLASSES = ("giraffe", "airplane", "clock", "zebra", "train", "bird",
            "elephant", "toilet", "stop sign", "bear")
 SPLITS = {"train", "val", "test"}
 SHA256 = re.compile(r"[0-9a-f]{64}\Z")
+WNID = re.compile(r"n\d{8}\Z")
+IMAGENET_VAL = re.compile(r"ILSVRC2012_val_(\d{8})\.JPEG\Z")
+IMAGENET_TRAIN = re.compile(r"n\d{8}_\d+\.JPEG\Z")
 
 
 def require(condition, message):
@@ -117,6 +121,60 @@ def check_waterbirds(root, seg_root):
         print(f"  {name}: total={sum(groups)}, groups(y0p0,y0p1,y1p0,y1p1)={groups}")
 
 
+def check_imagenet(root):
+    manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
+    require(manifest.get("schema") == 1 and manifest.get("dataset") == "imagenet2012_train_val",
+            "Unsupported ImageNet manifest")
+    classes = manifest.get("classes")
+    require(isinstance(classes, list) and len(classes) == 1000
+            and all(isinstance(name, str) and WNID.fullmatch(name) for name in classes)
+            and classes == sorted(set(classes)),
+            "ImageNet manifest needs 1,000 sorted WordNet IDs")
+    require(manifest.get("counts") == {"train": 1281167, "val": 50000},
+            "Unexpected ImageNet split counts")
+    hashes = manifest.get("archive_sha256")
+    require(isinstance(hashes, dict) and set(hashes) == {"train", "val", "devkit"}
+            and all(isinstance(value, str) and SHA256.fullmatch(value) for value in hashes.values()),
+            "Missing ImageNet source archive hashes")
+    require(not (root / "test").exists(), "This ImageNet setup contains train and val only")
+
+    totals, val_ids = {}, set()
+    for split in ("train", "val"):
+        directory = root / split
+        require(directory.is_dir(), f"Missing ImageNet {split} directory")
+        actual_classes = {item.name for item in os.scandir(directory) if item.is_dir()}
+        require(actual_classes == set(classes), f"ImageNet {split} classes differ from manifest")
+        total = 0
+        for wnid in classes:
+            count = 0
+            with os.scandir(directory / wnid) as entries:
+                for entry in entries:
+                    require(entry.is_file() and not entry.is_symlink(),
+                            f"Unexpected ImageNet {split} entry: {entry.path}")
+                    if split == "train":
+                        require(IMAGENET_TRAIN.fullmatch(entry.name) and entry.name.startswith(wnid + "_"),
+                                f"Invalid ImageNet train filename: {entry.path}")
+                    else:
+                        match = IMAGENET_VAL.fullmatch(entry.name)
+                        require(match is not None, f"Invalid ImageNet val filename: {entry.path}")
+                        number = int(match.group(1))
+                        require(1 <= number <= 50000 and number not in val_ids,
+                                f"Duplicate or out-of-range ImageNet val ID: {entry.path}")
+                        val_ids.add(number)
+                    count += 1
+            if split == "val":
+                require(count == 50, f"ImageNet val class {wnid} has {count} images, expected 50")
+            else:
+                require(count > 0, f"Empty ImageNet train class: {wnid}")
+            total += count
+        totals[split] = total
+        require(total == manifest["counts"][split],
+                f"ImageNet {split} contains {total} images, expected {manifest['counts'][split]}")
+    require(len(val_ids) == 50000, "ImageNet validation IDs are incomplete")
+    print("ImageNet-1K train/val verified (structure and counts; source hashes recorded)")
+    print(f"  train={totals['train']}, val={totals['val']}, classes={len(classes)}")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
@@ -126,12 +184,16 @@ def main():
     waterbirds = sub.add_parser("waterbirds", help="check Waterbirds")
     waterbirds.add_argument("root", type=Path)
     waterbirds.add_argument("--seg-root", type=Path, help="also require CUB segmentation masks")
+    imagenet = sub.add_parser("imagenet", help="check ImageNet-1K train and val")
+    imagenet.add_argument("root", type=Path)
     args = parser.parse_args()
     try:
         if args.command == "coco":
             check_coco(args.root, args.full)
         elif args.command == "waterbirds":
             check_waterbirds(args.root, args.seg_root)
+        elif args.command == "imagenet":
+            check_imagenet(args.root)
     except (OSError, ValueError, KeyError, TypeError, json.JSONDecodeError) as exc:
         parser.exit(1, f"Asset check failed: {exc}\n")
 

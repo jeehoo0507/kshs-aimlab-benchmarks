@@ -17,6 +17,7 @@ A benchmark for comparing the performance of MaskedKD and new methods.
 | --- | --- | --- |
 | [COCO single](datasets/coco_single/README.md) | 10-class image classification | Macro accuracy |
 | [Waterbirds](datasets/waterbirds/README.md) | Spurious correlation robustness | Worst-group accuracy |
+| [ImageNet-1K](datasets/imagenet/README.md) | Pretraining and validation | Validation top-1/top-5 accuracy |
 
 For data preparation and validation, see the [dataset guide](datasets/README.md).
 

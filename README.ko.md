@@ -17,6 +17,7 @@ MaskedKD와 새로운 방법의 성능을 비교하기 위한 벤치마크입니
 | --- | --- | --- |
 | [COCO single](datasets/coco_single/README.md) | 10개 클래스 이미지 분류 | 클래스별 정확도의 평균 (macro accuracy) |
 | [Waterbirds](datasets/waterbirds/README.md) | 허위 상관관계에 대한 강건성 | 그룹별 정확도의 최솟값 (worst-group accuracy) |
+| [ImageNet-1K](datasets/imagenet/README.md) | 사전학습 및 검증 | validation top-1/top-5 정확도 |
 
 데이터 준비와 검증 방법은 [데이터셋 안내](datasets/README.md)를 참고하세요.
 
