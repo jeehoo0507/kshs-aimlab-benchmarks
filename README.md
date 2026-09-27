@@ -40,6 +40,8 @@ python3 scripts/check_assets.py waterbirds /path/to/waterbird_complete95_forest2
 
 These commands check existing datasets; they do not download data.
 
+Before training, check the [GPU guide](GPU.md) for memory and parallel-job sizing.
+
 ## Checkpoints
 
 The current MaskedKD checkpoints contain **DeiT-Tiny student** weights distilled from a DeiT-Small teacher. DeiT-Small student checkpoints will be added later.

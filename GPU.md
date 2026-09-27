@@ -1,5 +1,7 @@
 # GPU guide
 
+[English](GPU.md) · [한국어](docs/ko/GPU.md)
+
 Check available memory and other processes before starting a run:
 
 ```bash
