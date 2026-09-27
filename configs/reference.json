@@ -1,0 +1,19 @@
+{
+  "teacher_epochs": 30,
+  "student_epochs": 100,
+  "seeds": [0, 1, 2],
+  "batch_size": 32,
+  "eval_batch_size": 32,
+  "accumulation_steps": 4,
+  "warmup_epochs": 5,
+  "learning_rate": 0.00005,
+  "min_learning_rate": 0.000001,
+  "weight_decay": 0.05,
+  "label_smoothing": 0.1,
+  "drop_path": 0.1,
+  "gradient_clip": 1.0,
+  "kd_alpha": 0.5,
+  "temperature": 1.0,
+  "keep_patches": 98,
+  "probe_epochs": [0, 10, 25, 50, 75, 100]
+}
