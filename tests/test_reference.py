@@ -62,17 +62,17 @@ def test_cpu_reference_train_resume_and_csv(tmp_path, monkeypatch):
     import reference.report as report
     monkeypatch.setattr(report, "ROOT", tmp_path)
     export(output, "coco", seeds=(0, 1, 2), publish_checkpoint=True)
-    with (tmp_path / "results/coco.csv").open() as stream:
+    with (tmp_path / "results/coco/runs.csv").open() as stream:
         rows = list(csv.DictReader(stream))
     assert {row["method"] for row in rows} == {"teacher", "maskedkd"}
     assert len(rows) == 4
-    with (tmp_path / "results/coco_summary.csv").open() as stream:
+    with (tmp_path / "results/coco/summary.csv").open() as stream:
         summary = list(csv.DictReader(stream))
     assert len(summary) == 1 and summary[0]["seeds"] == "0|1|2"
     assert (tmp_path / "checkpoints/coco/maskedkd.pt").is_file()
-    with (tmp_path / "results/coco_mask_probe.csv").open() as stream:
+    with (tmp_path / "results/coco/mask_validation.csv").open() as stream:
         assert {int(row["epoch"]) for row in csv.DictReader(stream)} == {0, 1}
-    with (tmp_path / "results/coco_mask_test.csv").open() as stream:
+    with (tmp_path / "results/coco/mask_test.csv").open() as stream:
         assert len(list(csv.DictReader(stream))) == 3
 
 

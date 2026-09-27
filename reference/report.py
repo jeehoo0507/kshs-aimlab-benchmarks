@@ -119,13 +119,13 @@ def export(output_root, dataset, seeds=(0, 1, 2), publish_checkpoint=True):
                 test_mask = {"dataset": dataset, "method": method, "seed": seed,
                              "checkpoint": "best", **result["test_mask"]}
                 test_masks.append({field: test_mask.get(field) for field in TEST_MASK_FIELDS})
-    destination = ROOT / "results"
-    write_csv(destination / f"{dataset}.csv", MAIN_FIELDS, main)
-    write_csv(destination / f"{dataset}_epochs.csv", EPOCH_FIELDS, epochs)
-    write_csv(destination / ("coco_per_class.csv" if dataset == "coco" else "waterbirds_per_group.csv"),
+    destination = ROOT / "results" / dataset
+    write_csv(destination / "runs.csv", MAIN_FIELDS, main)
+    write_csv(destination / "epochs.csv", EPOCH_FIELDS, epochs)
+    write_csv(destination / ("per_class.csv" if dataset == "coco" else "per_group.csv"),
               CLASS_FIELDS if dataset == "coco" else GROUP_FIELDS, classes if dataset == "coco" else groups)
-    write_csv(destination / f"{dataset}_mask_probe.csv", PROBE_FIELDS, probes)
-    write_csv(destination / f"{dataset}_mask_test.csv", TEST_MASK_FIELDS, test_masks)
+    write_csv(destination / "mask_validation.csv", PROBE_FIELDS, probes)
+    write_csv(destination / "mask_test.csv", TEST_MASK_FIELDS, test_masks)
     students = sorted((row for row in main if row["method"] == "maskedkd"), key=lambda row: row["seed"])
     summary = []
     if len(students) == 3 and [row["seed"] for row in students] == list(seeds):
@@ -146,7 +146,7 @@ def export(output_root, dataset, seeds=(0, 1, 2), publish_checkpoint=True):
                         "isolated_seed0_train_hours": isolated["train_hours"],
                         "isolated_seed0_peak_vram_gib": isolated["peak_vram_gib"],
                         "isolated_seed0_samples_per_second": isolated["samples_per_second"]})
-    write_csv(destination / f"{dataset}_summary.csv", SUMMARY_FIELDS, summary)
+    write_csv(destination / "summary.csv", SUMMARY_FIELDS, summary)
     representative = run_directory(output_root, dataset, "student", 0) / "best.pt"
     if publish_checkpoint and representative.exists():
         destination = ROOT / "checkpoints" / dataset / "maskedkd.pt"
@@ -155,4 +155,4 @@ def export(output_root, dataset, seeds=(0, 1, 2), publish_checkpoint=True):
             raise ValueError(f"Existing published checkpoint differs: {destination}")
         if not destination.exists():
             shutil.copyfile(representative, destination)
-    print(f"Exported {len(main)} completed runs for {dataset} into results/", flush=True)
+    print(f"Exported {len(main)} completed runs into results/{dataset}/", flush=True)
