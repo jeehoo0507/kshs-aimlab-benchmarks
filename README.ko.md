@@ -42,7 +42,15 @@ python3 scripts/check_assets.py waterbirds /path/to/waterbird_complete95_forest2
 
 ## 체크포인트
 
-직접 학습한 비교용 MaskedKD 체크포인트는 [COCO single](checkpoints/coco/maskedkd_coco.pt)과 [Waterbirds](checkpoints/waterbirds/maskedkd_waterbirds.pt)에 있습니다.
+현재 MaskedKD 체크포인트는 DeiT-Small Teacher로 증류한 **DeiT-Tiny Student** 가중치입니다. DeiT-Small Student 체크포인트는 추후 추가할 예정입니다.
+
+| Student | 데이터셋 (체크포인트) |
+| --- | --- |
+| DeiT-Tiny | [COCO single](checkpoints/coco/maskedkd_coco.pt) |
+| DeiT-Tiny | [Waterbirds](checkpoints/waterbirds/maskedkd_waterbirds.pt) |
+| DeiT-Small | — |
+| DeiT-Small | — |
+
 [체크포인트 안내](checkpoints/README.md)에는 공식 ImageNet 사전학습 DeiT-Tiny·Small·Base 가중치 다운로드 명령도 있습니다.
 
 ## 결과
